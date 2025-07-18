@@ -1,0 +1,15 @@
+@model MyAuthDemo.Models.User
+
+<h2>My Profile</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<table class="table">
+    <tr><th>Username</th><td>@Model.Name</td></tr>
+    <tr><th>Email</th><td>@Model.Email</td></tr>
+</table>
+
+<a href="@Url.Action("EditProfile")" class="btn btn-primary">Edit Profile</a>
