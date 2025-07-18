@@ -1,0 +1,13 @@
+@model MyAuthDemo.Models.RegisterViewModel
+@{
+    ViewBag.Title = "Register";
+}
+<h2>Register</h2>
+<form asp-action="Register" method="post">
+    <input asp-for="Name" placeholder="Nama" /><br />
+    <input asp-for="Email" placeholder="Email" /><br />
+    <input asp-for="Password" placeholder="Password" type="password" /><br />
+    <button type="submit">Register</button>
+    @Html.ValidationSummary()
+</form>
+<a href="/Auth/Login">Login</a>
