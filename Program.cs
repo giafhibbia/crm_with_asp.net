@@ -36,12 +36,39 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    SeedData.Initialize(dbContext); // ← kalau kamu punya seed ini juga
+    var connection = dbContext.Database.GetDbConnection();
+    connection.Open();
+
+    using (var command = connection.CreateCommand())
+    {
+        // Cek apakah kolom ProvinceId sudah ada di tabel Leads
+        command.CommandText = @"
+            SELECT COUNT(*) 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_NAME = 'Leads' AND COLUMN_NAME = 'ProvinceId';
+        ";
+
+        var exists = Convert.ToInt32(command.ExecuteScalar());
+
+        if (exists == 0)
+        {
+            Console.WriteLine("Kolom ProvinceId belum ada, jalankan migrasi...");
+            dbContext.Database.Migrate();
+        }
+        else
+        {
+            Console.WriteLine("Kolom ProvinceId sudah ada, lewati migrasi agar tidak error.");
+        }
+    }
+
+    // Jalankan seeder seperti biasa
+    SeedData.Initialize(dbContext);
 
     var regionDb = scope.ServiceProvider.GetRequiredService<RegionDbContext>();
-    SeedProvinceData.Initialize(regionDb); // ← baris yang error kemarin
+    SeedProvinceData.Initialize(regionDb);
     SeedRegencyData.Initialize(regionDb);
 }
+
 
 
 // Middleware pipeline config (error handling, static files, routing, dll)

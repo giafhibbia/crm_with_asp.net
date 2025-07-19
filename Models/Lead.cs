@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MyAuthDemo.Models.Region;
 
 namespace MyAuthDemo.Models
 {
@@ -11,8 +12,8 @@ namespace MyAuthDemo.Models
         [ForeignKey("GroupId")]
         public virtual Group? Group { get; set; }
 
-        public string? CompanyName { get; set; } 
-        
+        public string? CompanyName { get; set; }
+
         [Required]
         public string City { get; set; } = "";
 
@@ -33,5 +34,16 @@ namespace MyAuthDemo.Models
         public User? User { get; set; }
 
         public string? ReferralName { get; set; }
+        
+        public int? ProvinceId { get; set; }
+        public int? RegencyId { get; set; }
+
+        // Optional navigation properties (kalau kamu pakai EF relasi)
+        [ForeignKey("ProvinceId")]
+        public Province? Province { get; set; }
+
+        [ForeignKey("RegencyId")]
+        public Regency? Regency { get; set; }
+
     }
 }

@@ -106,8 +106,14 @@ namespace MyAuthDemo.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int?>("ProvinceId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ReferralName")
                         .HasColumnType("longtext");
+
+                    b.Property<int?>("RegencyId")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -115,6 +121,10 @@ namespace MyAuthDemo.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GroupId");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.HasIndex("RegencyId");
 
                     b.HasIndex("UserId");
 
@@ -153,6 +163,52 @@ namespace MyAuthDemo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Positions");
+                });
+
+            modelBuilder.Entity("MyAuthDemo.Models.Region.Province", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("reg_provinces");
+                });
+
+            modelBuilder.Entity("MyAuthDemo.Models.Region.Regency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("ProvinceId")
+                        .HasColumnType("int")
+                        .HasColumnName("province_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.ToTable("reg_regencies");
                 });
 
             modelBuilder.Entity("MyAuthDemo.Models.Role", b =>
@@ -260,6 +316,14 @@ namespace MyAuthDemo.Migrations
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("MyAuthDemo.Models.Region.Province", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceId");
+
+                    b.HasOne("MyAuthDemo.Models.Region.Regency", "Regency")
+                        .WithMany()
+                        .HasForeignKey("RegencyId");
+
                     b.HasOne("MyAuthDemo.Models.User", "User")
                         .WithMany("Leads")
                         .HasForeignKey("UserId")
@@ -268,7 +332,22 @@ namespace MyAuthDemo.Migrations
 
                     b.Navigation("Group");
 
+                    b.Navigation("Province");
+
+                    b.Navigation("Regency");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MyAuthDemo.Models.Region.Regency", b =>
+                {
+                    b.HasOne("MyAuthDemo.Models.Region.Province", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Province");
                 });
 
             modelBuilder.Entity("MyAuthDemo.Models.RolePermission", b =>
