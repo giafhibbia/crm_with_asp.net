@@ -12,28 +12,39 @@
   <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
 </div>
 
-<!-- Search and Filter Form -->
-<form method="get" class="mb-4 flex flex-wrap gap-4 items-center">
-    <input
-        type="text"
-        name="search"
-        value="@Model.Search"
-        placeholder="Search by Company"
-        class="border rounded px-3 py-1"
-        autocomplete="off"
-    />
-    <select name="status" class="border rounded px-3 py-1">
-        <option value="">-- All Status --</option>
-        @foreach (var s in (List<string>)ViewBag.StatusOptions)
-        {
-            <option value="@s" @(s == Model.Status ? "selected" : null)>@s</option>
-        }
-    </select>
+<!-- Search and Filter Form and add -->
+<div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+  <form method="get" class="flex flex-wrap gap-4 items-center flex-grow">
+      <input
+          type="text"
+          name="search"
+          value="@Model.Search"
+          placeholder="Search by Company"
+          class="border rounded px-3 py-1"
+          autocomplete="off"
+      />
+      <select name="status" class="border rounded px-3 py-1">
+          <option value="">-- All Status --</option>
+          @foreach (var s in (List<string>)ViewBag.StatusOptions)
+            {
+                var selected = s == Model.Status ? "selected" : "";
+                @Html.Raw($"<option value=\"{s}\" {selected}>{s}</option>")
+            }
 
-    <button type="submit" class="bg-[#009434] text-white px-4 py-1 rounded hover:bg-[#007e2a]">
-        Filter
-    </button>
-</form>
+
+      </select>
+
+      <button type="submit" class="bg-[#009434] text-white px-4 py-1 rounded hover:bg-[#007e2a]">
+          Filter
+      </button>
+  </form>
+
+  <a href="@Url.Action("Create", "Lead")" 
+     class="bg-[#009434] text-white px-4 py-2 rounded hover:bg-[#007e2a] whitespace-nowrap">
+    + Add Lead
+  </a>
+</div>
+
 
 <!-- Table Desktop -->
 <div class="overflow-x-auto rounded shadow">
