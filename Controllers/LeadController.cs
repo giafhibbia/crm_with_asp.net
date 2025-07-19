@@ -83,23 +83,35 @@ namespace MyAuthDemo.Controllers
             return View(new Lead());
         }
 
-        // POST: /Lead/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Lead model)
         {
+            Console.WriteLine("DEBUG ProvinceId: " + model.ProvinceId);
+            Console.WriteLine("DEBUG RegencyId: " + model.RegencyId);
+
             if (!ModelState.IsValid)
             {
+                foreach (var key in ModelState.Keys)
+                {
+                    var errors = ModelState[key].Errors;
+                    foreach (var error in errors)
+                    {
+                        Console.WriteLine($"Field {key}: {error.ErrorMessage}");
+                    }
+                }
+
                 ViewBag.Groups = _db.Groups.ToList();
                 return View(model);
             }
 
-            model.UserId = 1; // Ganti dengan user login nyata
+            model.UserId = 1; // dummy
             _db.Leads.Add(model);
             _db.SaveChanges();
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: /Lead/Edit/5
         public IActionResult Edit(int id)
@@ -126,7 +138,6 @@ namespace MyAuthDemo.Controllers
             if (lead == null) return NotFound();
 
             lead.GroupId = model.GroupId;
-            lead.City = model.City;
             lead.Address = model.Address;
             lead.Phone = model.Phone;
             lead.Email = model.Email;
@@ -142,26 +153,28 @@ namespace MyAuthDemo.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Lead/Delete/5  --> Hanya 1 method Delete, ini untuk tampilkan konfirmasi delete
+        // GET: Lead/Delete/5
         public IActionResult Delete(int id)
         {
-            var lead = _db.Leads
-                .Include(l => l.Group)
-                .Include(l => l.User)
-                .FirstOrDefault(l => l.Id == id);
-
-            if (lead == null) return NotFound();
+            var lead = _db.Leads.FirstOrDefault(x => x.Id == id);
+            if (lead == null)
+            {
+                return NotFound();
+            }
 
             return View(lead);
         }
 
-        // POST: /Lead/Delete/5  --> POST method dengan nama berbeda DeleteConfirmed
-        [HttpPost, ActionName("Delete")]
+        // POST: Lead/DeleteConfirmed/5
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
             var lead = _db.Leads.Find(id);
-            if (lead == null) return NotFound();
+            if (lead == null)
+            {
+                return NotFound();
+            }
 
             _db.Leads.Remove(lead);
             _db.SaveChanges();

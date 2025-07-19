@@ -12,22 +12,22 @@ namespace MyAuthDemo.Models
         [ForeignKey("GroupId")]
         public virtual Group? Group { get; set; }
 
-        public string? CompanyName { get; set; }
+        public string CompanyName { get; set; }
 
         [Required]
-        public string City { get; set; } = "";
-
         public string Address { get; set; } = "";
         public string Phone { get; set; } = "";
         public string Email { get; set; } = "";
 
         [Required]
-        public string ContractNumber { get; set; } = "";
-        public string ContractStatus { get; set; } = "Active";
 
         public string PICName { get; set; } = "";
         public string PICPhone { get; set; } = "";
         public string PICEmail { get; set; } = "";
+
+        
+        public string? ContractNumber { get; set; } = "";
+        public string? ContractStatus { get; set; } = "Active";
 
         [ForeignKey("User")]
         public int UserId { get; set; }
@@ -35,7 +35,10 @@ namespace MyAuthDemo.Models
 
         public string? ReferralName { get; set; }
         
+        [Required(ErrorMessage = "Province is required")]
         public int? ProvinceId { get; set; }
+
+        [Required(ErrorMessage = "Regency is required")]
         public int? RegencyId { get; set; }
 
         // Optional navigation properties (kalau kamu pakai EF relasi)
