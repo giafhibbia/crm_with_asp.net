@@ -3,6 +3,9 @@ using MyAuthDemo.Data;
 using MyAuthDemo.Models;
 using System;
 using System.Linq;
+using System.Data.Common;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
 
 namespace MyAuthDemo.Data
 {
