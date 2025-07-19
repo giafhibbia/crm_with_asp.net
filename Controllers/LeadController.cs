@@ -1,0 +1,172 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MyAuthDemo.Data;
+using MyAuthDemo.Models;
+
+namespace MyAuthDemo.Controllers
+{
+    public class LeadController : Controller
+    {
+        private readonly AppDbContext _db;
+
+        public LeadController(AppDbContext db)
+        {
+            _db = db;
+        }
+
+        // GET: /Lead/Index
+        public IActionResult Index(string search = "", string status = "", int page = 1, int pageSize = 10)
+        {
+            var query = _db.Leads
+                .Include(l => l.Group)
+                .Include(l => l.User)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(l => l.CompanyName.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(l => l.ContractStatus == status);
+            }
+
+            var totalItems = query.Count();
+
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var items = query
+                .OrderBy(l => l.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var model = new PagedResult<Lead>
+            {
+                Items = items,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                Search = search,
+                Status = status
+            };
+
+            ViewBag.StatusOptions = _db.Leads
+                .Select(l => l.ContractStatus)
+                .Distinct()
+                .ToList();
+
+            return View(model);
+        }
+
+        // GET: /Lead/Details/5
+        public IActionResult Details(int id)
+        {
+            var lead = _db.Leads
+                .Include(l => l.Group)
+                .Include(l => l.User)
+                .AsNoTracking()
+                .FirstOrDefault(l => l.Id == id);
+
+            if (lead == null) return NotFound();
+
+            return View(lead);
+        }
+
+        // GET: /Lead/Create
+        public IActionResult Create()
+        {
+            ViewBag.Groups = _db.Groups.ToList();
+            return View(new Lead());
+        }
+
+        // POST: /Lead/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Lead model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Groups = _db.Groups.ToList();
+                return View(model);
+            }
+
+            model.UserId = 1; // Ganti dengan user login nyata
+            _db.Leads.Add(model);
+            _db.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /Lead/Edit/5
+        public IActionResult Edit(int id)
+        {
+            var lead = _db.Leads.Find(id);
+            if (lead == null) return NotFound();
+
+            ViewBag.Groups = _db.Groups.ToList();
+            return View(lead);
+        }
+
+        // POST: /Lead/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Lead model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Groups = _db.Groups.ToList();
+                return View(model);
+            }
+
+            var lead = _db.Leads.Find(model.Id);
+            if (lead == null) return NotFound();
+
+            lead.GroupId = model.GroupId;
+            lead.City = model.City;
+            lead.Address = model.Address;
+            lead.Phone = model.Phone;
+            lead.Email = model.Email;
+            lead.ContractNumber = model.ContractNumber;
+            lead.ContractStatus = model.ContractStatus;
+            lead.PICName = model.PICName;
+            lead.PICPhone = model.PICPhone;
+            lead.PICEmail = model.PICEmail;
+            lead.ReferralName = model.ReferralName;
+
+            _db.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /Lead/Delete/5  --> Hanya 1 method Delete, ini untuk tampilkan konfirmasi delete
+        public IActionResult Delete(int id)
+        {
+            var lead = _db.Leads
+                .Include(l => l.Group)
+                .Include(l => l.User)
+                .FirstOrDefault(l => l.Id == id);
+
+            if (lead == null) return NotFound();
+
+            return View(lead);
+        }
+
+        // POST: /Lead/Delete/5  --> POST method dengan nama berbeda DeleteConfirmed
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var lead = _db.Leads.Find(id);
+            if (lead == null) return NotFound();
+
+            _db.Leads.Remove(lead);
+            _db.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}

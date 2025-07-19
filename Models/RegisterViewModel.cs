@@ -11,5 +11,12 @@ namespace MyAuthDemo.Models
         public string Password { get; set; } = "";
 
         public string? Name { get; set; }
+
+        public int? PositionId { get; set; }
+
+        public int? RoleId { get; set; }
+
+        public IFormFile? Avatar { get; set; }   // Untuk upload avatar
     }
+
 }

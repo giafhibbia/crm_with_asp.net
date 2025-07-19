@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyAuthDemo.Data;
 
@@ -11,9 +12,11 @@ using MyAuthDemo.Data;
 namespace MyAuthDemo.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718080508_AddGroupAndLeadEntities2")]
+    partial class AddGroupAndLeadEntities2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,9 +75,6 @@ namespace MyAuthDemo.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("CompanyName")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("ContractNumber")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -87,7 +87,7 @@ namespace MyAuthDemo.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("GroupId")
+                    b.Property<int>("GroupId")
                         .HasColumnType("int");
 
                     b.Property<string>("PICEmail")
@@ -104,9 +104,6 @@ namespace MyAuthDemo.Migrations
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ReferralName")
                         .HasColumnType("longtext");
 
                     b.Property<int>("UserId")
@@ -258,7 +255,8 @@ namespace MyAuthDemo.Migrations
                     b.HasOne("MyAuthDemo.Models.Group", "Group")
                         .WithMany("Leads")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.HasOne("MyAuthDemo.Models.User", "User")
                         .WithMany("Leads")

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyAuthDemo.Data;
 
@@ -11,9 +12,11 @@ using MyAuthDemo.Data;
 namespace MyAuthDemo.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718085026_AddCompanyNameToLeads")]
+    partial class AddCompanyNameToLeads
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,9 +73,6 @@ namespace MyAuthDemo.Migrations
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("CompanyName")
                         .HasColumnType("longtext");
 
                     b.Property<string>("ContractNumber")

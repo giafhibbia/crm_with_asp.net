@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyAuthDemo.Data;
 
@@ -11,9 +12,11 @@ using MyAuthDemo.Data;
 namespace MyAuthDemo.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718061407_InitialCreateV3")]
+    partial class InitialCreateV3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,105 +24,6 @@ namespace MyAuthDemo.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("MyAuthDemo.Models.Group", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("UserIdCreate")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserIdUpdate")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserIdCreate");
-
-                    b.HasIndex("UserIdUpdate");
-
-                    b.ToTable("Groups");
-                });
-
-            modelBuilder.Entity("MyAuthDemo.Models.Lead", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("CompanyName")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ContractNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ContractStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PICEmail")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("PICName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("PICPhone")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ReferralName")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Leads");
-                });
 
             modelBuilder.Entity("MyAuthDemo.Models.Permission", b =>
                 {
@@ -235,42 +139,6 @@ namespace MyAuthDemo.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MyAuthDemo.Models.Group", b =>
-                {
-                    b.HasOne("MyAuthDemo.Models.User", "UserCreate")
-                        .WithMany()
-                        .HasForeignKey("UserIdCreate")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("MyAuthDemo.Models.User", "UserUpdate")
-                        .WithMany()
-                        .HasForeignKey("UserIdUpdate")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("UserCreate");
-
-                    b.Navigation("UserUpdate");
-                });
-
-            modelBuilder.Entity("MyAuthDemo.Models.Lead", b =>
-                {
-                    b.HasOne("MyAuthDemo.Models.Group", "Group")
-                        .WithMany("Leads")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("MyAuthDemo.Models.User", "User")
-                        .WithMany("Leads")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MyAuthDemo.Models.RolePermission", b =>
                 {
                     b.HasOne("MyAuthDemo.Models.Permission", "Permission")
@@ -307,11 +175,6 @@ namespace MyAuthDemo.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("MyAuthDemo.Models.Group", b =>
-                {
-                    b.Navigation("Leads");
-                });
-
             modelBuilder.Entity("MyAuthDemo.Models.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
@@ -327,11 +190,6 @@ namespace MyAuthDemo.Migrations
                     b.Navigation("RolePermissions");
 
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("MyAuthDemo.Models.User", b =>
-                {
-                    b.Navigation("Leads");
                 });
 #pragma warning restore 612, 618
         }

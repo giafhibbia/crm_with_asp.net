@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title - Dashboard</title>
+    <meta name="description" content="@ViewBag.MetaDescription" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen bg-gray-100">
+
+    <!-- Sidebar (fixed on large screens) -->
+    @await Html.PartialAsync("_Sidebar")
+
+    <!-- Main content wrapper -->
+    <div class="flex-1 flex flex-col lg:ml-64 min-h-screen">
+        
+        <!-- Header (fixed on mobile) -->
+        @await Html.PartialAsync("_Header")
+
+        <!-- Main content area -->
+        <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 bg-gray-50 mt-10 md:mt-14 lg:mt-0 mb-8">
+            @RenderBody()
+        </main>
+
+        <!-- Footer -->
+        @await Html.PartialAsync("_Footer")
+    </div>
+
+    <!-- AlpineJS -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

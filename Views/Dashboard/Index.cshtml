@@ -1,6 +1,11 @@
 @{
-    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    ViewBag.Title = "Dashboard Home";
+    ViewBag.MetaDescription = "Dashboard main page";
 }
-<h2>Dashboard</h2>
-<p>Selamat datang, @ViewBag.Name!</p>
-<a href="/Auth/Logout">Logout</a>
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-6 space-y-6">
+    <h2 class="text-2xl font-semibold text-gray-900">@ViewBag.Title</h2>
+    <p class="text-gray-700 text-base sm:text-lg">Selamat datang, <span class="font-medium">@ViewBag.Name</span>!</p>
+    <a href="/Auth/Logout" class="inline-block text-red-600 hover:text-red-800 underline transition">Logout</a>
+</div>

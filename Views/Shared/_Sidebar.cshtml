@@ -1,0 +1,208 @@
+<!-- Mobile topbar -->
+<header
+  class="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 px-5 py-3 shadow fixed top-0 left-0 right-0 z-40"
+>
+  <div class="font-bold text-xl tracking-wide text-[#009434]">MyAuthDemo</div>
+  <button
+    id="mobile-menu-button"
+    class="text-gray-600 hover:text-[#009434] focus:outline-none focus:ring-2 focus:ring-[#00b144] rounded"
+    aria-label="Toggle menu"
+  >
+    <!-- Hamburger icon -->
+    <svg
+      id="icon-hamburger"
+      class="w-7 h-7"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+</header>
+
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    bool isCustomerActive = currentController == "Lead" || currentController == "Customer";
+}
+
+<aside
+  id="sidebar"
+  x-data="{ openCustomer: @Html.Raw(isCustomerActive.ToString().ToLower()) }"
+  class="fixed top-0 left-0 z-50 w-64 h-full bg-white border-r border-gray-300 flex flex-col
+         transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl"
+>
+  <div
+    class="px-6 py-5 border-b border-gray-300 flex items-center justify-between font-extrabold text-2xl tracking-widest text-[#009434] select-none"
+  >
+    MyAuthDemo
+
+    <button
+      id="sidebar-close-button"
+      class="lg:hidden text-gray-600 hover:text-[#009434] focus:outline-none focus:ring-2 focus:ring-[#00b144] rounded"
+      aria-label="Close menu"
+    >
+      <svg
+        id="icon-close"
+        class="w-7 h-7"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="flex-1 px-5 py-7 space-y-1 overflow-y-auto mt-14 lg:mt-0">
+    <a
+      href="/Dashboard"
+      class="group flex items-center gap-3 px-4 py-2 rounded-lg font-semibold transition duration-200
+        @(currentController == "Dashboard" ? "bg-[#009434] text-white" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
+    >
+      <svg
+        class="w-6 h-6 transition-colors duration-200
+          @(currentController == "Dashboard" ? "text-white" : "text-gray-400 group-hover:text-white")"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"></path>
+      </svg>
+      Dashboard
+    </a>
+
+    <a
+      href="/User/Profile"
+      class="group flex items-center gap-3 px-4 py-2 rounded-lg font-semibold transition duration-200
+        @(currentController == "User" && currentAction == "Profile" ? "bg-[#009434] text-white" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
+    >
+      <svg
+        class="w-6 h-6 transition-colors duration-200
+          @(currentController == "User" && currentAction == "Profile" ? "text-white" : "text-gray-400 group-hover:text-white")"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M5.121 17.804A9.969 9.969 0 0112 15c2.485 0 4.77.96 6.464 2.535M15 10a3 3 0 11-6 0 3 3 0 016 0z"
+        ></path>
+      </svg>
+      My Profile
+    </a>
+
+    <a
+      href="/User/Index"
+      class="group flex items-center gap-3 px-4 py-2 rounded-lg font-semibold transition duration-200
+        @(currentController == "User" && currentAction == "Index" ? "bg-[#009434] text-white" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
+    >
+      <svg
+        class="w-6 h-6 transition-colors duration-200
+          @(currentController == "User" && currentAction == "Index" ? "text-white" : "text-gray-400 group-hover:text-white")"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m12 0a4 4 0 00-3-3.87M9 12a4 4 0 110-8 4 4 0 010 8z"
+        ></path>
+      </svg>
+      Users
+    </a>
+
+    <!-- Customer Management dropdown -->
+    <button
+        x-on:click="openCustomer = !openCustomer"
+        class="w-full flex justify-between items-center px-4 py-2 rounded-lg font-semibold transition duration-200 focus:outline-none
+            @(isCustomerActive ? "bg-[#009434] text-white hover:bg-[#007e2a]" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
+        type="button"
+        aria-expanded="false"
+    >
+        <span :class="openCustomer ? 'text-white' : ''" class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m4 0a4 4 0 10-4-4 4 4 0 004 4zm6-5a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            Customer
+        </span>
+
+        <svg :class="openCustomer ? 'text-white transform rotate-90' : 'text-gray-400'"
+             class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+    </button>
+
+    <div
+      x-show="openCustomer"
+      x-transition
+      class="pl-8 space-y-2 mt-1"
+      style="display: none;"
+    >
+      <a
+        href="/Lead/Index"
+        class="block px-4 py-2 rounded-lg text-gray-600 hover:bg-green-200 hover:text-green-800 transition duration-200
+           @(currentController == "Lead" ? "bg-[#009434] text-white" : "")"
+      >
+        Leads
+      </a>
+      <a
+        href="/Customer/List"
+        class="block px-4 py-2 rounded-lg text-gray-600 hover:bg-green-200 hover:text-green-800 transition duration-200
+           @(currentController == "Customer" ? "bg-[#009434] text-white" : "")"
+      >
+        Customers
+      </a>
+    </div>
+
+    <a href="/Auth/Logout"
+       class="block px-4 py-2 rounded-lg text-red-600 hover:bg-red-100 hover:text-red-800 font-semibold transition duration-200">
+      Logout
+    </a>
+  </nav>
+</aside>
+
+<!-- Overlay for mobile sidebar -->
+<div
+  id="sidebar-overlay"
+  class="fixed inset-0 bg-black bg-opacity-50 hidden lg:hidden z-40"
+></div>
+
+<script>
+  const sidebar = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebar-overlay");
+  const mobileMenuButton = document.getElementById("mobile-menu-button");
+  const sidebarCloseButton = document.getElementById("sidebar-close-button");
+
+  function openSidebar() {
+    sidebar.classList.remove("-translate-x-full");
+    sidebarOverlay.classList.remove("hidden");
+  }
+
+  function closeSidebar() {
+    sidebar.classList.add("-translate-x-full");
+    sidebarOverlay.classList.add("hidden");
+  }
+
+  mobileMenuButton.addEventListener("click", openSidebar);
+  sidebarCloseButton.addEventListener("click", closeSidebar);
+
+  // Uncomment ini jika ingin klik overlay juga menutup sidebar
+  // sidebarOverlay.addEventListener("click", closeSidebar);
+</script>
