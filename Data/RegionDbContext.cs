@@ -11,5 +11,7 @@ namespace MyAuthDemo.Data
         }
 
         public DbSet<Province> Provinces { get; set; } = null!;
+        public DbSet<Regency> Regencies { get; set; } = null!;
+
     }
 }

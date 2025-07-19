@@ -40,6 +40,7 @@ using (var scope = app.Services.CreateScope())
 
     var regionDb = scope.ServiceProvider.GetRequiredService<RegionDbContext>();
     SeedProvinceData.Initialize(regionDb); // ← baris yang error kemarin
+    SeedRegencyData.Initialize(regionDb);
 }
 
 
