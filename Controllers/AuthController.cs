@@ -4,24 +4,59 @@ using MyAuthDemo.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using MyAuthDemo.Data;
 
 namespace MyAuthDemo.Controllers
 {
     public class AuthController : Controller
     {
         private readonly AuthService _auth;
+        private readonly AppDbContext _db;
 
-        public AuthController(AuthService auth) { _auth = auth; }
+        public AuthController(AuthService auth, AppDbContext db)
+        {
+            _auth = auth;
+            _db = db;
+        }
 
         [HttpGet]
-        public IActionResult Register() => View(new RegisterViewModel());
+        [HttpGet]
+        public IActionResult Register()
+        {
+            ViewBag.Roles = _db.Roles.Select(r => new { r.Id, r.Name }).ToList();
+            ViewBag.Positions = _db.Positions.Select(p => new { p.Id, p.Name }).ToList();
+            return View(new RegisterViewModel());
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel vm)
         {
+            // Kirim data Roles & Positions ke View (dropdown)
+            ViewBag.Roles = _db.Roles.Select(r => new { r.Id, r.Name }).ToList();
+            ViewBag.Positions = _db.Positions.Select(p => new { p.Id, p.Name }).ToList();
+
             if (!ModelState.IsValid) return View(vm);
 
-            var (success, error) = await _auth.RegisterAsync(vm.Email, vm.Password, vm.Name);
+            string? avatarUrl = null;
+            if (vm.Avatar != null && vm.Avatar.Length > 0)
+            {
+                var uploads = Path.Combine("wwwroot", "avatars");
+                Directory.CreateDirectory(uploads);
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(vm.Avatar.FileName)}";
+                var filePath = Path.Combine(uploads, fileName);
+                using (var stream = System.IO.File.Create(filePath))
+                {
+                    await vm.Avatar.CopyToAsync(stream);
+                }
+                avatarUrl = $"/avatars/{fileName}";
+            }
+
+            var (success, error) = await _auth.RegisterAsync(
+                vm.Email, vm.Password, vm.Name, vm.RoleId, vm.PositionId, avatarUrl);
+
             if (!success)
             {
                 ModelState.AddModelError("", error ?? "Gagal registrasi");
@@ -49,7 +84,8 @@ namespace MyAuthDemo.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name ?? user.Email),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role?.Name ?? "")
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
