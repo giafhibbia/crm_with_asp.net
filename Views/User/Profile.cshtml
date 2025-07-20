@@ -1,15 +1,35 @@
 @model MyAuthDemo.Models.User
+@{
+    ViewBag.Title = "My Profile";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
 
-<h2>My Profile</h2>
+<h1 class="text-3xl font-bold mb-6">My Profile</h1>
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        @TempData["SuccessMessage"]
+    </div>
 }
 
-<table class="table">
-    <tr><th>Username</th><td>@Model.Name</td></tr>
-    <tr><th>Email</th><td>@Model.Email</td></tr>
-</table>
+<div class="bg-white shadow-md rounded-lg p-6 max-w-xl">
+    <table class="table-auto w-full">
+        <tbody>
+            <tr>
+                <th class="text-left px-4 py-2 font-semibold text-gray-700">Username</th>
+                <td class="px-4 py-2">@Model.Name</td>
+            </tr>
+            <tr class="bg-gray-50">
+                <th class="text-left px-4 py-2 font-semibold text-gray-700">Email</th>
+                <td class="px-4 py-2">@Model.Email</td>
+            </tr>
+        </tbody>
+    </table>
 
-<a href="@Url.Action("EditProfile")" class="btn btn-primary">Edit Profile</a>
+    <div class="mt-6">
+        <a href="@Url.Action("EditProfile")" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
+            Edit Profile
+        </a>
+    </div>
+</div>
