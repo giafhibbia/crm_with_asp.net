@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using MyAuthDemo.Models.Leads;
 namespace MyAuthDemo.Models
 {
     public class Group

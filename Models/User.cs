@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-
+using MyAuthDemo.Models.Leads;
 namespace MyAuthDemo.Models
 {
     public class User
