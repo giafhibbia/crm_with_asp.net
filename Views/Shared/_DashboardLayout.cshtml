@@ -9,26 +9,57 @@
 </head>
 <body class="flex flex-col lg:flex-row min-h-screen bg-gray-100">
 
-    <!-- Sidebar (fixed on large screens) -->
+    <!-- Toast Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div id="toast-success" class="fixed top-6 right-6 z-50 flex items-start gap-4 bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded shadow transition-opacity duration-300">
+            <div class="flex-1">@TempData["Success"]</div>
+            <button type="button" class="text-green-800 hover:text-green-600" onclick="closeToast('toast-success')">&times;</button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div id="toast-error" class="fixed top-6 right-6 z-50 flex items-start gap-4 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded shadow transition-opacity duration-300">
+            <div class="flex-1">@TempData["Error"]</div>
+            <button type="button" class="text-red-800 hover:text-red-600" onclick="closeToast('toast-error')">&times;</button>
+        </div>
+    }
+
+    <!-- Sidebar (left) -->
     @await Html.PartialAsync("_Sidebar")
 
-    <!-- Main content wrapper -->
+    <!-- Main content -->
     <div class="flex-1 flex flex-col lg:ml-64 min-h-screen">
-        
-        <!-- Header (fixed on mobile) -->
         @await Html.PartialAsync("_Header")
 
-        <!-- Main content area -->
         <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 bg-gray-50 mt-10 md:mt-14 lg:mt-0 mb-8">
             @RenderBody()
         </main>
 
-        <!-- Footer -->
         @await Html.PartialAsync("_Footer")
     </div>
 
-    <!-- AlpineJS -->
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        function closeToast(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.display = 'none';
+            }
+        }
+
+        $(document).ready(function () {
+            // Auto fade out after 4 seconds
+            setTimeout(function () {
+                $('#toast-success').fadeOut('slow');
+                $('#toast-error').fadeOut('slow');
+            }, 4000);
+        });
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>
