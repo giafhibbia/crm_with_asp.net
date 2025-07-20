@@ -20,6 +20,8 @@ namespace MyAuthDemo.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<Lead> Leads { get; set; }
 
+        public DbSet<FcmToken> FcmTokens { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -10,8 +10,12 @@
     <link rel="stylesheet" href="~/css/costum.css" asp-append-version="true" />
 </head>
 <body class="font-poppins text-gray-800 text-base lg:text-[15px] flex flex-col lg:flex-row min-h-screen bg-gray-100">
-
-
+    @using Microsoft.Extensions.Options
+    @using MyAuthDemo.Models
+    @inject IOptions<MyAuthDemo.Models.FirebaseOptions> FirebaseOptions
+    @{
+        var firebase = FirebaseOptions.Value;
+    }
     <!-- Toast Messages -->
     @if (TempData["Success"] != null)
     {
@@ -73,6 +77,71 @@
         }
     </script>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+        @* const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        }; *@
+
+        const firebaseConfig = {
+            apiKey: "@firebase.ApiKey",
+            authDomain: "@firebase.AuthDomain",
+            projectId: "@firebase.ProjectId",
+            storageBucket: "@firebase.StorageBucket",
+            messagingSenderId: "@firebase.MessagingSenderId",
+            appId: "@firebase.AppId",
+            measurementId: "@firebase.MeasurementId"
+        };
+
+        
+
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('Service Worker registered with scope:', registration.scope);
+
+                Notification.requestPermission().then((permission) => {
+                    console.log('Notification permission:', permission);
+                    if (permission === 'granted') {
+                        navigator.serviceWorker.ready.then((registration) => {
+                            getToken(messaging, {
+                                vapidKey: 'BGlzz63jBQpw3wS30vi3CXG6z83zuUuNkdADIungPnk8ONiO0hci1mlXslvydqRH8LAWATb6-r55wCY_V3y7Wf0',
+                                serviceWorkerRegistration: registration // ⬅️ wajib agar token sukses
+                            }).then((currentToken) => {
+                                if (currentToken) {
+                                    console.log('FCM Token:', currentToken);
+                                    fetch('/Notification/SaveFcmToken', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ token: currentToken })
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => console.log('Token saved:', data))
+                                    .catch(err => console.error('Save token error:', err));
+                                }
+                            }).catch((err) => {
+                                console.error('Token error:', err);
+                            });
+                        });
+                    }
+                });
+
+
+            }).catch((err) => {
+                console.error('Service Worker registration failed:', err);
+            });
+        }
+        </script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

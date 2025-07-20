@@ -4,6 +4,7 @@ using MyAuthDemo.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MyAuthDemo.Data.Seeders;
+using MyAuthDemo.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Auth/Login";
     });
 builder.Services.AddAuthorization();
+
+builder.Services.Configure<FirebaseOptions>(
+    builder.Configuration.GetSection("Firebase"));
+
 
 var app = builder.Build();
 
