@@ -37,13 +37,13 @@
 
       </select>
 
-      <button type="submit" class="bg-[#009434] text-white px-4 py-1 rounded hover:bg-[#007e2a]">
+      <button type="submit" class="bg-[#b9b9b9] text-white px-4 py-1 rounded hover:bg-[#727272]">
           Filter
       </button>
   </form>
 
   <a href="@Url.Action("Create", "Lead")" 
-     class="bg-[#009434] text-white px-4 py-2 rounded hover:bg-[#007e2a] whitespace-nowrap">
+     class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-[#007e2a] whitespace-nowrap">
     + Add Lead
   </a>
 </div>
@@ -52,7 +52,7 @@
 <!-- Table Desktop -->
 <div class="overflow-x-auto rounded shadow">
     <table class="min-w-full bg-white rounded overflow-hidden hidden md:table">
-        <thead class="bg-[#009434] text-white">
+        <thead class="bg-[#f3f3f3] text-[#555555]">
             <tr>
                 <th class="px-6 py-3 text-left">Company (PT)</th>
                 <th class="px-6 py-3 text-left">Assign</th>
@@ -64,10 +64,10 @@
             @foreach (var lead in Model.Items)
             {
                 <tr class="hover:bg-green-50">
-                    <td class="px-6 py-3">@lead.CompanyName</td>
-                    <td class="px-6 py-3">@lead.User?.Name</td>
-                    <td class="px-6 py-3">@lead.Status</td>
-                    <td class="px-6 py-3 text-center space-x-3">
+                    <td class="px-6 py-3 text-[12px]">@lead.CompanyName</td>
+                    <td class="px-6 py-3 text-[12px]">@lead.User?.Name</td>
+                    <td class="px-6 py-3 text-[12px]">@lead.Status</td>
+                    <td class="px-6 py-3 text-center space-x-3 text-[12px]">
                         <a href="/Lead/Details/@lead.Id" class="text-gray-600 hover:text-[#009434]" title="Details">
                             <!-- Eye icon -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

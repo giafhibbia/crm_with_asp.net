@@ -6,8 +6,11 @@
     <title>@ViewBag.Title - Dashboard</title>
     <meta name="description" content="@ViewBag.MetaDescription" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/costum.css" asp-append-version="true" />
 </head>
-<body class="flex flex-col lg:flex-row min-h-screen bg-gray-100">
+<body class="font-poppins text-gray-800 text-base lg:text-[15px] flex flex-col lg:flex-row min-h-screen bg-gray-100">
+
 
     <!-- Toast Messages -->
     @if (TempData["Success"] != null)
@@ -33,7 +36,7 @@
     <div class="flex-1 flex flex-col lg:ml-64 min-h-screen">
         @await Html.PartialAsync("_Header")
 
-        <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 bg-gray-50 mt-10 md:mt-14 lg:mt-0 mb-8">
+        <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6 bg-gray-50 mt-20 md:mt-14 lg:mt-0 mb-8">
             @RenderBody()
         </main>
 
@@ -59,6 +62,15 @@
                 $('#toast-error').fadeOut('slow');
             }, 4000);
         });
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
     </script>
 
     @RenderSection("Scripts", required: false)
