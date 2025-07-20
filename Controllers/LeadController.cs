@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyAuthDemo.Data;
@@ -6,6 +7,7 @@ using MyAuthDemo.Models.Leads;
 
 namespace MyAuthDemo.Controllers
 {
+    [Authorize]
     public class LeadController : Controller
     {
         private readonly AppDbContext _db;
@@ -58,7 +60,8 @@ namespace MyAuthDemo.Controllers
 
             ViewBag.StatusOptions = Enum.GetValues(typeof(LeadStatus))
                 .Cast<LeadStatus>()
-                .Select(e => new {
+                .Select(e => new
+                {
                     Value = ((int)e).ToString(),
                     Text = e.ToString()
                 }).ToList();
