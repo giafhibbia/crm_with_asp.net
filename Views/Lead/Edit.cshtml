@@ -1,0 +1,195 @@
+@model MyAuthDemo.Models.Lead
+@{
+    var isEdit = Model?.Id > 0;
+    ViewBag.Title = isEdit ? "Edit Lead" : "Create Lead";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+<div class="w-full mx-auto px-4 py-8">
+    <!-- Back Button -->
+    <div class="mb-2">
+        <a href="@Url.Action("Index", "Lead")" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition">
+            <div class="p-1.5 rounded-full bg-blue-100 hover:bg-blue-200 ">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600 pt-18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </div>
+            <span class="ml-2 font-medium">Back</span>
+        </a>
+    </div>
+
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">@ViewBag.Title</h1>
+    </div>
+    
+
+
+    <form asp-action="Edit" method="post" class="bg-white p-6 rounded-lg shadow space-y-6 border border-gray-300">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <!-- Group -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Group <span class="text-gray-400">(optional)</span></label>
+            <select asp-for="GroupId" class="mt-1 block w-full rounded-md border border-[#e7e7e8] shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="">-- No Group --</option>
+                @foreach (var g in ViewBag.Groups)
+                {
+                    var selected = (Model?.GroupId == g.Id) ? "selected" : "";
+                    @Html.Raw($"<option value=\"{g.Id}\" {selected}>{g.Name}</option>")
+                }
+            </select>
+        </div>
+
+        <!-- Company Name -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Company Name <span class="text-red-500">*</span></label>
+            <input asp-for="CompanyName" class="mt-1 block w-full rounded-md border border-[#e7e7e8]" />
+        </div>
+
+        <!-- Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Province -->
+            <div>
+                <label class="block text-sm font-medium">Province *</label>
+                <select id="province-select" class="select2 w-full"></select>
+                <input type="hidden" asp-for="ProvinceId" id="ProvinceId" />
+            </div>
+
+            <!-- Regency -->
+            <div>
+                <label class="block text-sm font-medium">Regency *</label>
+                <select id="regency-select" class="select2 w-full"></select>
+                <input type="hidden" asp-for="RegencyId" id="RegencyId" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Address <span class="text-red-500">*</span></label>
+                <input asp-for="Address" class="mt-1 block w-full rounded-md border border-[#e7e7e8]" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Phone <span class="text-red-500">*</span></label>
+                <input asp-for="Phone" class="mt-1 block w-full rounded-md border border-[#e7e7e8]" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+                <input asp-for="Email" type="email" class="mt-1 block w-full rounded-md border border-[#e7e7e8]" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">PIC Name <span class="text-red-500">*</span></label>
+                <input asp-for="PICName" class="mt-1 block w-full rounded-md border border-[#e7e7e8]" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">PIC Phone <span class="text-red-500">*</span></label>
+                <input asp-for="PICPhone" class="mt-1 block w-full rounded-md border border-[#e7e7e8]" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">PIC Email <span class="text-red-500">*</span></label>
+                <input asp-for="PICEmail" type="email" class="mt-1 block w-full rounded-md border border-[#e7e7e8]" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Referral Name <span class="text-gray-400">(optional)</span></label>
+                <input asp-for="ReferralName" class="mt-1 block w-full rounded-md border border-[#e7e7e8]" />
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-6">
+            <button type="submit" class="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Update Lead
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            const provinceId = '@Model.ProvinceId';
+            const regencyId = '@Model.RegencyId';
+
+            // Init Province
+            $('#province-select').select2({
+                placeholder: 'Select Province',
+                ajax: {
+                    url: '/region/provinces',
+                    dataType: 'json',
+                    delay: 250,
+                    data: params => ({ q: params.term }),
+                    processResults: data => ({ results: data })
+                }
+            });
+
+            // Init Regency
+            $('#regency-select').select2({
+                placeholder: 'Select Regency',
+                ajax: {
+                    url: () => `/region/regencies?provinceId=${$('#ProvinceId').val()}`,
+                    dataType: 'json',
+                    delay: 250,
+                    data: params => ({ term: params.term }),
+                    processResults: data => ({ results: data })
+                }
+            });
+
+            // Preload Province + then preload Regency
+            if (provinceId) {
+                $('#ProvinceId').val(provinceId);
+
+                // Get text for selected province
+                $.get(`/region/provinces?q=`, function (provinces) {
+                    const province = provinces.find(p => p.id == provinceId);
+                    if (province) {
+                        const option = new Option(province.text, province.id, true, true);
+                        $('#province-select').append(option).trigger('change');
+                    }
+
+                    // Preload regency only after province set
+                    if (regencyId) {
+                        $('#RegencyId').val(regencyId);
+
+                        $.get(`/region/regencies?provinceId=${provinceId}`, function (regencies) {
+                            const regency = regencies.find(r => r.id == regencyId);
+                            if (regency) {
+                                const option = new Option(regency.text, regency.id, true, true);
+                                $('#regency-select').append(option).trigger('change');
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Province Change Event
+            $('#province-select').on('change', function () {
+                const val = $(this).val();
+                $('#ProvinceId').val(val).trigger('input');
+                $('#regency-select').val(null).trigger('change');
+                $('#RegencyId').val('');
+            });
+
+            // Regency Change Event
+            $('#regency-select').on('change', function () {
+                $('#RegencyId').val($(this).val()).trigger('input');
+            });
+        });
+
+        
+
+
+    </script>
+}

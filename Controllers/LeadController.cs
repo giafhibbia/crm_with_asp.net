@@ -102,22 +102,28 @@ namespace MyAuthDemo.Controllers
                 }
 
                 ViewBag.Groups = _db.Groups.ToList();
+                TempData["Error"] = "Failed to create lead. Please fix the form errors.";
                 return View(model);
             }
 
-            model.UserId = 1; // dummy
+            model.UserId = 1; // dummy user
             _db.Leads.Add(model);
             _db.SaveChanges();
 
+            TempData["Success"] = "Lead created successfully.";
             return RedirectToAction(nameof(Index));
         }
+
 
 
         // GET: /Lead/Edit/5
         public IActionResult Edit(int id)
         {
-            var lead = _db.Leads.Find(id);
-            if (lead == null) return NotFound();
+            var lead = _db.Leads.FirstOrDefault(l => l.Id == id);
+            if (lead == null)
+            {
+                return NotFound();
+            }
 
             ViewBag.Groups = _db.Groups.ToList();
             return View(lead);
@@ -128,21 +134,40 @@ namespace MyAuthDemo.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Lead model)
         {
+            Console.WriteLine("DEBUG ProvinceId: " + model.ProvinceId);
+            Console.WriteLine("DEBUG RegencyId: " + model.RegencyId);
+
             if (!ModelState.IsValid)
             {
+                foreach (var key in ModelState.Keys)
+                {
+                    var errors = ModelState[key].Errors;
+                    foreach (var error in errors)
+                    {
+                        Console.WriteLine($"Field {key}: {error.ErrorMessage}");
+                    }
+                }
+
                 ViewBag.Groups = _db.Groups.ToList();
-                return View(model);
+                TempData["Error"] = "Update failed. Please fix the form errors.";
+                return View(model); // tetap di halaman edit
             }
 
-            var lead = _db.Leads.Find(model.Id);
-            if (lead == null) return NotFound();
+            var lead = _db.Leads.FirstOrDefault(l => l.Id == model.Id);
+            if (lead == null)
+            {
+                TempData["Error"] = "Lead not found.";
+                return RedirectToAction(nameof(Index));
+            }
 
+            // Update field
             lead.GroupId = model.GroupId;
+            lead.CompanyName = model.CompanyName;
+            lead.ProvinceId = model.ProvinceId;
+            lead.RegencyId = model.RegencyId;
             lead.Address = model.Address;
             lead.Phone = model.Phone;
             lead.Email = model.Email;
-            lead.ContractNumber = model.ContractNumber;
-            lead.ContractStatus = model.ContractStatus;
             lead.PICName = model.PICName;
             lead.PICPhone = model.PICPhone;
             lead.PICEmail = model.PICEmail;
@@ -150,8 +175,10 @@ namespace MyAuthDemo.Controllers
 
             _db.SaveChanges();
 
+            TempData["Success"] = "Lead updated successfully.";
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: Lead/Delete/5
         public IActionResult Delete(int id)
