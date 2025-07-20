@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyAuthDemo.Data;
 using MyAuthDemo.Models;
+using MyAuthDemo.Models.Leads;
 
 namespace MyAuthDemo.Controllers
 {
@@ -28,10 +29,11 @@ namespace MyAuthDemo.Controllers
                 query = query.Where(l => l.CompanyName.Contains(search));
             }
 
-            if (!string.IsNullOrEmpty(status))
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<ContractStatus>(status, out var parsedStatus))
             {
-                query = query.Where(l => l.ContractStatus == status);
+                query = query.Where(l => l.ContractStatus == parsedStatus);
             }
+
 
             var totalItems = query.Count();
 
@@ -54,10 +56,14 @@ namespace MyAuthDemo.Controllers
                 Status = status
             };
 
-            ViewBag.StatusOptions = _db.Leads
-                .Select(l => l.ContractStatus)
-                .Distinct()
-                .ToList();
+            ViewBag.StatusOptions = Enum.GetValues(typeof(LeadStatus))
+                .Cast<LeadStatus>()
+                .Select(e => new {
+                    Value = ((int)e).ToString(),
+                    Text = e.ToString()
+                }).ToList();
+
+
 
             return View(model);
         }

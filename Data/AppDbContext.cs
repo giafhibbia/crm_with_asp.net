@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyAuthDemo.Models;
+using MyAuthDemo.Models.Leads;
 
 namespace MyAuthDemo.Data
 {

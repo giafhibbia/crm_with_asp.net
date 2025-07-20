@@ -56,7 +56,7 @@ namespace MyAuthDemo.Migrations
                     b.ToTable("Groups");
                 });
 
-            modelBuilder.Entity("MyAuthDemo.Models.Lead", b =>
+            modelBuilder.Entity("MyAuthDemo.Models.Leads.Lead", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,20 +68,15 @@ namespace MyAuthDemo.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("CompanyName")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("ContractNumber")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("ContractStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("ContractStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -107,12 +102,17 @@ namespace MyAuthDemo.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("ProvinceId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("ReferralName")
                         .HasColumnType("longtext");
 
                     b.Property<int?>("RegencyId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -309,7 +309,7 @@ namespace MyAuthDemo.Migrations
                     b.Navigation("UserUpdate");
                 });
 
-            modelBuilder.Entity("MyAuthDemo.Models.Lead", b =>
+            modelBuilder.Entity("MyAuthDemo.Models.Leads.Lead", b =>
                 {
                     b.HasOne("MyAuthDemo.Models.Group", "Group")
                         .WithMany("Leads")
@@ -318,11 +318,15 @@ namespace MyAuthDemo.Migrations
 
                     b.HasOne("MyAuthDemo.Models.Region.Province", "Province")
                         .WithMany()
-                        .HasForeignKey("ProvinceId");
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MyAuthDemo.Models.Region.Regency", "Regency")
                         .WithMany()
-                        .HasForeignKey("RegencyId");
+                        .HasForeignKey("RegencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MyAuthDemo.Models.User", "User")
                         .WithMany("Leads")

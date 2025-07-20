@@ -1,4 +1,4 @@
-@model MyAuthDemo.Models.Lead
+@model MyAuthDemo.Models.Leads.Lead
 @{
     ViewBag.Title = "Lead Details";
     Layout = "~/Views/Shared/_DashboardLayout.cshtml";
@@ -47,7 +47,7 @@
 
       <div>
         <label class="font-semibold text-gray-700">Contract Status:</label>
-        <div class="mt-1">@((Model.ContractStatus) ?? "-")</div>
+        <div class="mt-1">@Model.ContractStatus.ToString()</div>
       </div>
 
       <div>

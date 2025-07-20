@@ -1,4 +1,4 @@
-@model PagedResult<MyAuthDemo.Models.Lead>
+@model PagedResult<MyAuthDemo.Models.Leads.Lead>
 
 @{
     ViewBag.Title = "Leads List";
@@ -25,11 +25,14 @@
       />
       <select name="status" class="border rounded px-3 py-1">
           <option value="">-- All Status --</option>
-          @foreach (var s in (List<string>)ViewBag.StatusOptions)
+          @foreach (var s in ViewBag.StatusOptions)
             {
-                var selected = s == Model.Status ? "selected" : "";
-                @Html.Raw($"<option value=\"{s}\" {selected}>{s}</option>")
+                string value = s.Value;
+                string text = s.Text;
+                var selected = value == Model.Status ? "selected" : "";
+                @Html.Raw($"<option value=\"{value}\" {selected}>{text}</option>")
             }
+
 
 
       </select>
@@ -52,7 +55,7 @@
         <thead class="bg-[#009434] text-white">
             <tr>
                 <th class="px-6 py-3 text-left">Company (PT)</th>
-                <th class="px-6 py-3 text-left">Created By</th>
+                <th class="px-6 py-3 text-left">Assign</th>
                 <th class="px-6 py-3 text-left">Status</th>
                 <th class="px-6 py-3 text-center">Actions</th>
             </tr>
@@ -63,7 +66,7 @@
                 <tr class="hover:bg-green-50">
                     <td class="px-6 py-3">@lead.CompanyName</td>
                     <td class="px-6 py-3">@lead.User?.Name</td>
-                    <td class="px-6 py-3">@lead.ContractStatus</td>
+                    <td class="px-6 py-3">@lead.Status</td>
                     <td class="px-6 py-3 text-center space-x-3">
                         <a href="/Lead/Details/@lead.Id" class="text-gray-600 hover:text-[#009434]" title="Details">
                             <!-- Eye icon -->
@@ -120,8 +123,8 @@
                     </a>
                 </div>
             </div>
-            <div><strong>Created By:</strong> @lead.User?.Name</div>
-            <div><strong>Status:</strong> @lead.ContractStatus</div>
+            <div><strong>Assign:</strong> @lead.User?.Name</div>
+            <div><strong>Status:</strong> @lead.Status</div>
         </div>
     }
 </div>
