@@ -5,6 +5,7 @@ using MyAuthDemo.Services;
 using MyAuthDemo.Models;
 using System.Security.Claims;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyAuthDemo.Controllers
 {
@@ -24,8 +25,15 @@ namespace MyAuthDemo.Controllers
         public IActionResult Profile()
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var user = _db.Users.Find(userId);
+
+            var user = _db.Users
+                .Include(u => u.Role)
+                .Include(u => u.Leads) // jika relasi Leads ada
+                .Include(u => u.Position)
+                .FirstOrDefault(u => u.Id == userId);
+
             if (user == null) return NotFound();
+
             return View(user);
         }
 
