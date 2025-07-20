@@ -21,7 +21,9 @@ namespace MyAuthDemo.Services
     if (user == null || user.Role == null || user.Role.RolePermissions == null)
         return false;
 
-    return user.Role.RolePermissions!.Any(rp => rp.Permission != null && rp.Permission.Name == permissionName);
+    return user?.Role?.RolePermissions != null &&
+       user.Role.RolePermissions.Any(rp => rp.Permission?.Name == permissionName);
+
 }
 
 public List<string> GetUserPermissions(int userId)
@@ -35,10 +37,11 @@ public List<string> GetUserPermissions(int userId)
     if (user == null || user.Role == null || user.Role.RolePermissions == null)
         return new List<string>();
 
-    return user.Role.RolePermissions!
+    return user?.Role?.RolePermissions?
         .Where(rp => rp.Permission != null)
         .Select(rp => rp.Permission!.Name)
-        .ToList();
+        .ToList() ?? new List<string>();
+
 }
 
 
