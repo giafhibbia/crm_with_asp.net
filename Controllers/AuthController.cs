@@ -22,7 +22,6 @@ namespace MyAuthDemo.Controllers
         }
 
         [HttpGet]
-        [HttpGet]
         public IActionResult Register()
         {
             ViewBag.Roles = _db.Roles.Select(r => new { r.Id, r.Name }).ToList();
@@ -30,11 +29,9 @@ namespace MyAuthDemo.Controllers
             return View(new RegisterViewModel());
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel vm)
         {
-            // Kirim data Roles & Positions ke View (dropdown)
             ViewBag.Roles = _db.Roles.Select(r => new { r.Id, r.Name }).ToList();
             ViewBag.Positions = _db.Positions.Select(p => new { p.Id, p.Name }).ToList();
 
@@ -62,6 +59,7 @@ namespace MyAuthDemo.Controllers
                 ModelState.AddModelError("", error ?? "Gagal registrasi");
                 return View(vm);
             }
+
             return RedirectToAction("Login");
         }
 
@@ -71,7 +69,8 @@ namespace MyAuthDemo.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
+            if (!ModelState.IsValid)
+                return View(vm);
 
             var user = await _auth.ValidateUserAsync(vm.Email, vm.Password);
             if (user == null)
@@ -80,13 +79,27 @@ namespace MyAuthDemo.Controllers
                 return View(vm);
             }
 
+            // Ambil role & permissions
+            var role = user.Role?.Name ?? "";
+
+            var permissionNames = user.Role?.RolePermissions?
+                .Select(rp => rp.Permission?.Name)
+                .Where(name => !string.IsNullOrWhiteSpace(name))  // hindari null & string kosong
+                .Select(name => name!)                            // karena sudah difilter, kita safe pakai '!'
+                .ToList() ?? new List<string>();
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name ?? user.Email),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role?.Name ?? "")
+                new Claim(ClaimTypes.Role, role)
             };
+
+            foreach (var permission in permissionNames)
+            {
+                claims.Add(new Claim("permission", permission));
+            }
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
@@ -94,6 +107,7 @@ namespace MyAuthDemo.Controllers
 
             return RedirectToAction("Index", "Dashboard");
         }
+
 
         public async Task<IActionResult> Logout()
         {
