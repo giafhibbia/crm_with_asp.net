@@ -12,8 +12,8 @@ using MyAuthDemo.Data;
 namespace MyAuthDemo.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250718085026_AddCompanyNameToLeads")]
-    partial class AddCompanyNameToLeads
+    [Migration("20250721141012_AddPasswordColumnToUser")]
+    partial class AddPasswordColumnToUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,26 @@ namespace MyAuthDemo.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("MyAuthDemo.Models.FcmToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FcmTokens");
+                });
 
             modelBuilder.Entity("MyAuthDemo.Models.Group", b =>
                 {
@@ -59,7 +79,7 @@ namespace MyAuthDemo.Migrations
                     b.ToTable("Groups");
                 });
 
-            modelBuilder.Entity("MyAuthDemo.Models.Lead", b =>
+            modelBuilder.Entity("MyAuthDemo.Models.Leads.Lead", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -71,17 +91,15 @@ namespace MyAuthDemo.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("City")
+                    b.Property<string>("CompanyName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("ContractNumber")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("ContractStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("ContractStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -106,8 +124,19 @@ namespace MyAuthDemo.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int?>("ProvinceId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
                     b.Property<string>("ReferralName")
                         .HasColumnType("longtext");
+
+                    b.Property<int?>("RegencyId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -115,6 +144,10 @@ namespace MyAuthDemo.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GroupId");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.HasIndex("RegencyId");
 
                     b.HasIndex("UserId");
 
@@ -153,6 +186,52 @@ namespace MyAuthDemo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Positions");
+                });
+
+            modelBuilder.Entity("MyAuthDemo.Models.Region.Province", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("reg_provinces", (string)null);
+                });
+
+            modelBuilder.Entity("MyAuthDemo.Models.Region.Regency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("ProvinceId")
+                        .HasColumnType("int")
+                        .HasColumnName("province_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.ToTable("reg_regencies", (string)null);
                 });
 
             modelBuilder.Entity("MyAuthDemo.Models.Role", b =>
@@ -214,6 +293,11 @@ namespace MyAuthDemo.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("PasswordHash")
@@ -241,34 +325,64 @@ namespace MyAuthDemo.Migrations
                         .WithMany()
                         .HasForeignKey("UserIdCreate")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Groups_UserIdCreate");
 
                     b.HasOne("MyAuthDemo.Models.User", "UserUpdate")
                         .WithMany()
                         .HasForeignKey("UserIdUpdate")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Groups_UserIdUpdate");
 
                     b.Navigation("UserCreate");
 
                     b.Navigation("UserUpdate");
                 });
 
-            modelBuilder.Entity("MyAuthDemo.Models.Lead", b =>
+            modelBuilder.Entity("MyAuthDemo.Models.Leads.Lead", b =>
                 {
                     b.HasOne("MyAuthDemo.Models.Group", "Group")
                         .WithMany("Leads")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Leads_Groups_GroupId");
+
+                    b.HasOne("MyAuthDemo.Models.Region.Province", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyAuthDemo.Models.Region.Regency", "Regency")
+                        .WithMany()
+                        .HasForeignKey("RegencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MyAuthDemo.Models.User", "User")
                         .WithMany("Leads")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Group");
 
+                    b.Navigation("Province");
+
+                    b.Navigation("Regency");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MyAuthDemo.Models.Region.Regency", b =>
+                {
+                    b.HasOne("MyAuthDemo.Models.Region.Province", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Province");
                 });
 
             modelBuilder.Entity("MyAuthDemo.Models.RolePermission", b =>
@@ -277,13 +391,15 @@ namespace MyAuthDemo.Migrations
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_RolePermissions_PermissionId");
 
                     b.HasOne("MyAuthDemo.Models.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_RolePermissions_RoleId");
 
                     b.Navigation("Permission");
 
@@ -295,12 +411,14 @@ namespace MyAuthDemo.Migrations
                     b.HasOne("MyAuthDemo.Models.Position", "Position")
                         .WithMany("Users")
                         .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Users_PositionId");
 
                     b.HasOne("MyAuthDemo.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Users_RoleId");
 
                     b.Navigation("Position");
 

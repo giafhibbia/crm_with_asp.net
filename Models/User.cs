@@ -6,13 +6,21 @@ namespace MyAuthDemo.Models
     {
         public int Id { get; set; }
 
-        [Required, EmailAddress]
+        [Required]
+        public string? Name { get; set; }
+
+        [Required]
+        [EmailAddress]
         public string Email { get; set; } = "";
+
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; } = "";
 
         [Required]
         public string PasswordHash { get; set; } = "";
 
-        public string? Name { get; set; }
+        
         public string? AvatarUrl { get; set; }
 
         // Foreign key dan navigation property untuk Position

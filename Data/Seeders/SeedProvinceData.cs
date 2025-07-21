@@ -7,7 +7,7 @@ namespace MyAuthDemo.Data.Seeders
 {
     public static class SeedProvinceData
     {
-        public static void Initialize(RegionDbContext context)
+        public static void Initialize(AppDbContext context)
         {
             try
             {

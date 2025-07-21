@@ -7,7 +7,7 @@ namespace MyAuthDemo.Data.Seeders
 {
     public static class SeedRegencyData
     {
-        public static void Initialize(RegionDbContext context)
+        public static void Initialize(AppDbContext context)
         {
             if (context.Regencies.Any()) return;
 

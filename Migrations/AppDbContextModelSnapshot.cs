@@ -202,7 +202,7 @@ namespace MyAuthDemo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("reg_provinces");
+                    b.ToTable("reg_provinces", (string)null);
                 });
 
             modelBuilder.Entity("MyAuthDemo.Models.Region.Regency", b =>
@@ -228,7 +228,7 @@ namespace MyAuthDemo.Migrations
 
                     b.HasIndex("ProvinceId");
 
-                    b.ToTable("reg_regencies");
+                    b.ToTable("reg_regencies", (string)null);
                 });
 
             modelBuilder.Entity("MyAuthDemo.Models.Role", b =>
@@ -290,6 +290,11 @@ namespace MyAuthDemo.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("PasswordHash")
@@ -317,12 +322,14 @@ namespace MyAuthDemo.Migrations
                         .WithMany()
                         .HasForeignKey("UserIdCreate")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_Groups_UserIdCreate");
 
                     b.HasOne("MyAuthDemo.Models.User", "UserUpdate")
                         .WithMany()
                         .HasForeignKey("UserIdUpdate")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Groups_UserIdUpdate");
 
                     b.Navigation("UserCreate");
 
@@ -334,7 +341,8 @@ namespace MyAuthDemo.Migrations
                     b.HasOne("MyAuthDemo.Models.Group", "Group")
                         .WithMany("Leads")
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Leads_Groups_GroupId");
 
                     b.HasOne("MyAuthDemo.Models.Region.Province", "Province")
                         .WithMany()
@@ -351,7 +359,7 @@ namespace MyAuthDemo.Migrations
                     b.HasOne("MyAuthDemo.Models.User", "User")
                         .WithMany("Leads")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Group");
@@ -380,13 +388,15 @@ namespace MyAuthDemo.Migrations
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_RolePermissions_PermissionId");
 
                     b.HasOne("MyAuthDemo.Models.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_RolePermissions_RoleId");
 
                     b.Navigation("Permission");
 
@@ -398,12 +408,14 @@ namespace MyAuthDemo.Migrations
                     b.HasOne("MyAuthDemo.Models.Position", "Position")
                         .WithMany("Users")
                         .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Users_PositionId");
 
                     b.HasOne("MyAuthDemo.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Users_RoleId");
 
                     b.Navigation("Position");
 

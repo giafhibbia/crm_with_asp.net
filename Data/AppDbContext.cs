@@ -1,89 +1,117 @@
 using Microsoft.EntityFrameworkCore;
 using MyAuthDemo.Models;
 using MyAuthDemo.Models.Leads;
+using MyAuthDemo.Models.Region;
 
 namespace MyAuthDemo.Data
 {
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options) { }
+            : base(options)
+        {
+        }
 
-        // Tabel Users, Roles, Positions, Permissions, RolePermissions
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<Position> Positions { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
-
-        // Tabel tambahan untuk Group dan Lead
+        public DbSet<Position> Positions { get; set; }
         public DbSet<Group> Groups { get; set; }
+        public DbSet<FcmToken> FcmTokens { get; set; }
+          public DbSet<Province> Provinces { get; set; }
+        public DbSet<Regency> Regencies { get; set; }
         public DbSet<Lead> Leads { get; set; }
 
-        public DbSet<FcmToken> FcmTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // --- User-Role (Many Users to One Role) ---
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(u => u.RoleId)
-                .OnDelete(DeleteBehavior.Restrict); // Jangan hapus Role kalau ada User
-
-            // --- User-Position (Many Users to One Position) ---
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Position)
-                .WithMany(p => p.Users)
-                .HasForeignKey(u => u.PositionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // --- Role - RolePermission (One Role to Many RolePermissions) ---
-            modelBuilder.Entity<RolePermission>()
-                .HasOne(rp => rp.Role)
-                .WithMany(r => r.RolePermissions)
-                .HasForeignKey(rp => rp.RoleId)
-                .OnDelete(DeleteBehavior.Cascade); // Hapus semua RolePermissions jika Role dihapus
-
-            // --- Permission - RolePermission (One Permission to Many RolePermissions) ---
-            modelBuilder.Entity<RolePermission>()
-                .HasOne(rp => rp.Permission)
-                .WithMany(p => p.RolePermissions)
-                .HasForeignKey(rp => rp.PermissionId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // --- Group - Lead (One Group to Many Leads) ---
-            modelBuilder.Entity<Group>()
-                .HasMany(g => g.Leads)
-                .WithOne(l => l.Group)
-                .HasForeignKey(l => l.GroupId)
-                .OnDelete(DeleteBehavior.SetNull); // Jika Group dihapus, set GroupId Lead jadi null
-
-            // --- Group - User (UserCreate) ---
+            // Relationships for Groups
+            // Group → User
             modelBuilder.Entity<Group>()
                 .HasOne(g => g.UserCreate)
                 .WithMany()
                 .HasForeignKey(g => g.UserIdCreate)
-                .OnDelete(DeleteBehavior.Restrict); // User yang buat Group tidak bisa dihapus tanpa reset fk
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Groups_UserIdCreate");
 
-            // --- Group - User (UserUpdate) ---
             modelBuilder.Entity<Group>()
                 .HasOne(g => g.UserUpdate)
                 .WithMany()
                 .HasForeignKey(g => g.UserIdUpdate)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Groups_UserIdUpdate");
 
-            // --- Lead - User (Creator) ---
+
+            // User → Role
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Role)
+                .WithMany(r => r.Users)
+                .HasForeignKey(u => u.RoleId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Users_RoleId");
+
+            // User → Position
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Position)
+                .WithMany(p => p.Users)
+                .HasForeignKey(u => u.PositionId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Users_PositionId");
+
+            // RolePermission → Role & Permission
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleId)
+                .HasConstraintName("FK_RolePermissions_RoleId");
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.PermissionId)
+                .HasConstraintName("FK_RolePermissions_PermissionId");
+                
+            modelBuilder.Entity<Province>()
+                .ToTable("reg_provinces")
+                .HasKey(p => p.Id);
+
+            modelBuilder.Entity<Province>()
+                .Property(p => p.Name)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            // Regency
+            modelBuilder.Entity<Regency>()
+                .ToTable("reg_regencies")
+                .HasKey(r => r.Id);
+
+            modelBuilder.Entity<Regency>()
+                .Property(r => r.Name)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            modelBuilder.Entity<Regency>()
+                .HasOne(r => r.Province)
+                .WithMany()
+                .HasForeignKey(r => r.ProvinceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+                
+
+            // Lead → Group
             modelBuilder.Entity<Lead>()
-                .HasOne(l => l.User)
-                .WithMany(u => u.Leads)
-                .HasForeignKey(l => l.UserId)
-                .OnDelete(DeleteBehavior.Restrict); // User tidak bisa dihapus jika masih punya Lead
+                .HasOne(z => z.Group)
+                .WithMany(g => g.Leads)
+                .HasForeignKey(z => z.GroupId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Leads_Groups_GroupId");
 
-            // Optional: Jika Anda ingin memperjelas bahwa property navigasi harus virtual supaya lazy loading bisa berjalan
-            // Bisa ditambahkan secara eksplisit pada model, tapi EF Core tidak mewajibkan
+
         }
+
     }
 }

@@ -5,6 +5,7 @@ namespace MyAuthDemo.Models
 {
     public class Group
     {
+        [Key]
         public int Id { get; set; }
 
         [Required, StringLength(150)]
