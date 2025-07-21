@@ -8,9 +8,9 @@ namespace MyAuthDemo.Controllers
     [Route("region")]
     public class RegionController : Controller
     {
-        private readonly RegionDbContext _context;
+        private readonly AppDbContext _context;
 
-        public RegionController(RegionDbContext context)
+        public RegionController(AppDbContext context)
         {
             _context = context;
         }
