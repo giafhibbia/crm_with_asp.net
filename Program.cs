@@ -8,8 +8,9 @@ using MyAuthDemo.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registrasi service dan dbcontext seperti biasa
+// Registrasi service dan dbcontext
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -17,84 +18,60 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-builder.Services.AddDbContext<RegionDbContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
-        new MySqlServerVersion(new Version(10, 4, 28)))); // sesuaikan versi MariaDB kamu
 
+
+// Dependency Injection
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PermissionService>();
+
+// Autentikasi & Autorisasi
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Auth/Login";
         options.AccessDeniedPath = "/Auth/Login";
     });
+
 builder.Services.AddAuthorization();
 
+// Firebase config opsional
 builder.Services.Configure<FirebaseOptions>(
     builder.Configuration.GetSection("Firebase"));
 
-
+// Build app
 var app = builder.Build();
 
+// Seeder hanya dijalankan tanpa migrasi
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var connection = dbContext.Database.GetDbConnection();
-    connection.Open();
-
-    using (var command = connection.CreateCommand())
-    {
-        // Cek apakah kolom ProvinceId sudah ada di tabel Leads
-        command.CommandText = @"
-            SELECT COUNT(*) 
-            FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_NAME = 'Leads' AND COLUMN_NAME = 'ProvinceId';
-        ";
-
-        var exists = Convert.ToInt32(command.ExecuteScalar());
-
-        if (exists == 0)
-        {
-            Console.WriteLine("Kolom ProvinceId belum ada, jalankan migrasi...");
-            dbContext.Database.Migrate();
-        }
-        else
-        {
-            Console.WriteLine("Kolom ProvinceId sudah ada, lewati migrasi agar tidak error.");
-        }
-    }
-
-    // Jalankan seeder seperti biasa
-    SeedData.Initialize(dbContext);
-
-    var regionDb = scope.ServiceProvider.GetRequiredService<RegionDbContext>();
-    SeedProvinceData.Initialize(regionDb);
-    SeedRegencyData.Initialize(regionDb);
+    SeedProvinceData.Initialize(dbContext);
+    SeedRegencyData.Initialize(dbContext);
+    SeedPositionData.Initialize(dbContext);
+    SeedAdminUserData.Initialize(dbContext);
+    SeedRolePermissionData.Initialize(dbContext);
 }
 
-
-
-// Middleware pipeline config (error handling, static files, routing, dll)
+// Middleware pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map controller route MVC biasa
+// Routing utama
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}"
 );
 
-// Map attribute routed controllers (API controller seperti SeedController)
 app.MapControllers();
 
 app.Run();
