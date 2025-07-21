@@ -18,40 +18,45 @@ namespace MyAuthDemo.Services
             _db = db;
         }
 
-        public async Task<(bool Success, string? Error)> RegisterAsync(
-            string email, string password, string? name,
-            int? roleId, int? positionId, string? avatarUrl)
+        public async Task<(bool success, string? error)> RegisterAsync(
+            string email, string password, string name, int? roleId, int? positionId, string? avatarUrl)
         {
-            if (await _repo.EmailExistsAsync(email))
-                return (false, "Email sudah terdaftar.");
-            var hash = _hasher.HashPassword(email, password);
+            if (_db.Users.Any(u => u.Email == email))
+                return (false, "Email sudah digunakan");
+
             var user = new User
             {
                 Email = email,
-                PasswordHash = hash,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
                 Name = name,
-                RoleId = roleId,
-                PositionId = positionId,
+                RoleId = roleId, // bisa null
+                PositionId = positionId, // bisa null
                 AvatarUrl = avatarUrl
             };
-            await _repo.AddAsync(user);
+
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
             return (true, null);
         }
+
 
         public async Task<User?> ValidateUserAsync(string email, string password)
         {
             var user = await _repo.GetByEmailAsync(email);
             if (user == null)
                 return null;
-            var res = _hasher.VerifyHashedPassword(email, user.PasswordHash, password);
-            if (res == PasswordVerificationResult.Success)
+
+            // Gunakan BCrypt untuk verifikasi
+            bool isValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            if (isValid)
             {
-                // Include role/position info (opsional, bisa eager loading)
                 user.Role = _db.Roles.FirstOrDefault(r => r.Id == user.RoleId);
                 user.Position = _db.Positions.FirstOrDefault(p => p.Id == user.PositionId);
                 return user;
             }
+
             return null;
         }
+
     }
 }
