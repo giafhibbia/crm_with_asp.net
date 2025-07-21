@@ -99,23 +99,25 @@ namespace MyAuthDemo.Controllers
             Console.WriteLine("DEBUG ProvinceId: " + model.ProvinceId);
             Console.WriteLine("DEBUG RegencyId: " + model.RegencyId);
 
-            if (!ModelState.IsValid)
+           if (!ModelState.IsValid)
+{
+            foreach (var key in ModelState.Keys)
             {
-                foreach (var key in ModelState.Keys)
+                if (ModelState.TryGetValue(key, out var entry) && entry != null)
                 {
-                    var errors = ModelState[key].Errors;
-                    foreach (var error in errors)
+                    foreach (var error in entry.Errors)
                     {
                         Console.WriteLine($"Field {key}: {error.ErrorMessage}");
                     }
                 }
-
-                ViewBag.Groups = _db.Groups.ToList();
-                TempData["Error"] = "Failed to create lead. Please fix the form errors.";
-                return View(model);
             }
 
-            model.UserId = 1; // dummy user
+            ViewBag.Groups = _db.Groups.ToList();
+            TempData["Error"] = "Failed to create lead. Please fix the form errors.";
+            return View(model);
+        }
+
+            
             _db.Leads.Add(model);
             _db.SaveChanges();
 
