@@ -1,0 +1,149 @@
+@model PagedResult<MyAuthDemo.Models.User>
+
+@{
+    ViewBag.Title = "Users List";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var currentRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+}
+
+<h1 class="text-3xl font-bold mb-6 text-[#009434]">@ViewBag.Title</h1>
+
+<div id="loading-spinner" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+  <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+</div>
+
+<div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+  <form method="get" class="flex flex-wrap gap-4 items-center flex-grow">
+      <input type="text" name="search" value="@Model.Search" placeholder="Search by name or email"
+             class="border rounded px-3 py-1" autocomplete="off" />
+
+      <select name="role" class="border rounded px-3 py-1">
+          <option value="">-- All Roles --</option>
+          @foreach (var r in ViewBag.RoleOptions as List<SelectListItem>)
+          {
+              string selected = r.Value == Model.Status ? "selected" : "";
+              @Html.Raw($"<option value=\"{r.Value}\" {selected}>{r.Text}</option>")
+          }
+      </select>
+
+      <button type="submit" class="bg-[#b9b9b9] text-white px-4 py-1 rounded hover:bg-[#727272]">
+          Filter
+      </button>
+  </form>
+
+  <a href="@Url.Action("Create", "User")" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-[#007e2a] whitespace-nowrap">
+    + Add User
+  </a>
+</div>
+
+<div class="overflow-x-auto rounded shadow">
+    <table class="min-w-full bg-white rounded overflow-hidden hidden md:table">
+        <thead class="bg-[#f3f3f3] text-[#555555]">
+            <tr>
+                <th class="px-6 py-3 text-left">Name</th>
+                <th class="px-6 py-3 text-left">Email</th>
+                <th class="px-6 py-3 text-left">Role</th>
+                <th class="px-6 py-3 text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            @foreach (var user in Model.Items)
+            {
+                <tr class="hover:bg-green-50 text-sm">
+                    <td class="px-6 py-3">@user.Name</td>
+                    <td class="px-6 py-3">@user.Email</td>
+                    <td class="px-6 py-3">@user.Role?.Name</td>
+                    <td class="px-6 py-3 text-center space-x-3">
+                        <a href="/User/Edit/@user.Id" class="text-blue-600 hover:underline">Edit</a>
+                        @if (currentRole == "Admin" || currentRole == "Superadmin")
+                        {
+                            <a href="/User/Delete/@user.Id" class="text-red-600 hover:underline" onclick="return confirm('Delete this user?')">Delete</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="md:hidden space-y-4 px-4">
+    @foreach (var user in Model.Items)
+    {
+        <div class="bg-white rounded shadow p-4">
+            <div class="font-semibold text-lg text-[#009434] mb-2">@user.Name</div>
+            <div><strong>Email:</strong> @user.Email</div>
+            <div><strong>Role:</strong> @user.Role?.Name</div>
+            <div class="mt-2 space-x-3">
+                <a href="/User/Edit/@user.Id" class="text-blue-600 hover:underline">Edit</a>
+                @if (currentRole == "Admin" || currentRole == "Superadmin")
+                {
+                    <a href="/User/Delete/@user.Id" class="text-red-600 hover:underline" onclick="return confirm('Delete this user?')">Delete</a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="flex justify-center mt-6 space-x-2" aria-label="Pagination">
+        @if (Model.HasPreviousPage)
+        {
+            <a href="@Url.Action("Index", new { page = Model.CurrentPage - 1, search = Model.Search, role = Model.Status })" class="px-3 py-1 border rounded hover:bg-[#009434] hover:text-white transition">Previous</a>
+        }
+        else
+        {
+            <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">Previous</span>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            if (i == Model.CurrentPage)
+            {
+                <span class="px-3 py-1 border rounded bg-[#009434] text-white">@i</span>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", new { page = i, search = Model.Search, role = Model.Status })" class="px-3 py-1 border rounded hover:bg-[#009434] hover:text-white transition">@i</a>
+            }
+        }
+
+        @if (Model.HasNextPage)
+        {
+            <a href="@Url.Action("Index", new { page = Model.CurrentPage + 1, search = Model.Search, role = Model.Status })" class="px-3 py-1 border rounded hover:bg-[#009434] hover:text-white transition">Next</a>
+        }
+        else
+        {
+            <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">Next</span>
+        }
+    </nav>
+}
+
+<style>
+  .loader {
+    border-top-color: #009434;
+    animation: spin 1s linear infinite;
+    border: 8px solid #f3f3f3;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+  }
+  @@keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  const spinner = document.getElementById('loading-spinner');
+  spinner.style.display = 'none';
+
+  document.querySelector('form')?.addEventListener('submit', () => {
+    spinner.style.display = 'flex';
+  });
+
+  document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      spinner.style.display = 'flex';
+    });
+  });
+</script>

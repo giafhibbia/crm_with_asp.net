@@ -119,6 +119,15 @@
                 <span asp-validation-for="PICEmail" class="text-sm text-red-600"></span>
             </div>
 
+            <!-- User (Required) -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Assigned User <span class="text-red-500">*</span></label>
+                <select id="user-select" class="select2 w-full"></select>
+                <input type="hidden" asp-for="UserId" id="UserId" />
+                <span asp-validation-for="UserId" class="text-sm text-red-600"></span>
+            </div>
+
+
             @* Referral Name (Optional) *@
             <div>
                 <label class="block text-sm font-medium text-gray-700">Referral Name <span class="text-gray-400">(optional)</span></label>
@@ -199,6 +208,29 @@
                 form.removeData("unobtrusiveValidation");
                 $.validator.unobtrusive.parse(form);
             }
+
+            $('#user-select').select2({
+                placeholder: 'Select User',
+                ajax: {
+                    url: '/User/GetUsers', // ganti sesuai controller
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data
+                        };
+                    }
+                }
+            }).on('change', function () {
+                $('#UserId').val($(this).val());
+                $(this).valid(); // trigger validasi jika pakai jQuery validation
+            });
+
         });
     </script>
 }
