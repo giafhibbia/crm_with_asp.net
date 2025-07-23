@@ -151,6 +151,67 @@ namespace MyAuthDemo.Migrations
                     b.ToTable("Leads");
                 });
 
+            modelBuilder.Entity("MyAuthDemo.Models.Machine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AssetCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Condition")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("InputAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("InputByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("UpdatedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("InputByUserId");
+
+                    b.HasIndex("UpdatedByUserId");
+
+                    b.ToTable("Machines");
+                });
+
             modelBuilder.Entity("MyAuthDemo.Models.Permission", b =>
                 {
                     b.Property<int>("Id")
@@ -183,6 +244,37 @@ namespace MyAuthDemo.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Positions");
+                });
+
+            modelBuilder.Entity("MyAuthDemo.Models.ProductCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<string>("IconUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductCategories");
                 });
 
             modelBuilder.Entity("MyAuthDemo.Models.Region.Province", b =>
@@ -371,6 +463,34 @@ namespace MyAuthDemo.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MyAuthDemo.Models.Machine", b =>
+                {
+                    b.HasOne("MyAuthDemo.Models.ProductCategory", "Category")
+                        .WithMany("Machines")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Machine_CategoryId");
+
+                    b.HasOne("MyAuthDemo.Models.User", "InputByUser")
+                        .WithMany("MachinesCreated")
+                        .HasForeignKey("InputByUserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Machine_InputByUserId");
+
+                    b.HasOne("MyAuthDemo.Models.User", "UpdatedByUser")
+                        .WithMany("MachinesUpdated")
+                        .HasForeignKey("UpdatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Machine_UpdatedByUserId");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("InputByUser");
+
+                    b.Navigation("UpdatedByUser");
+                });
+
             modelBuilder.Entity("MyAuthDemo.Models.Region.Regency", b =>
                 {
                     b.HasOne("MyAuthDemo.Models.Region.Province", "Province")
@@ -437,6 +557,11 @@ namespace MyAuthDemo.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("MyAuthDemo.Models.ProductCategory", b =>
+                {
+                    b.Navigation("Machines");
+                });
+
             modelBuilder.Entity("MyAuthDemo.Models.Role", b =>
                 {
                     b.Navigation("RolePermissions");
@@ -447,6 +572,10 @@ namespace MyAuthDemo.Migrations
             modelBuilder.Entity("MyAuthDemo.Models.User", b =>
                 {
                     b.Navigation("Leads");
+
+                    b.Navigation("MachinesCreated");
+
+                    b.Navigation("MachinesUpdated");
                 });
 #pragma warning restore 612, 618
         }
