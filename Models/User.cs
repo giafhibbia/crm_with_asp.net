@@ -20,7 +20,7 @@ namespace MyAuthDemo.Models
         [Required]
         public string PasswordHash { get; set; } = "";
 
-        
+
         public string? AvatarUrl { get; set; }
 
         // Foreign key dan navigation property untuk Position
@@ -30,6 +30,9 @@ namespace MyAuthDemo.Models
         // Foreign key dan navigation property untuk Role
         public int? RoleId { get; set; }
         public Role? Role { get; set; }
+        // Relasi collection
         public ICollection<Lead>? Leads { get; set; }
+        public ICollection<Machine>? MachinesCreated { get; set; }
+        public ICollection<Machine>? MachinesUpdated { get; set; }
     }
 }
