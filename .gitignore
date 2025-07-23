@@ -22,6 +22,8 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+# Folder upload, tidak di-track git
+wwwroot/uploads/
 
 # .NET Core
 project.lock.json
