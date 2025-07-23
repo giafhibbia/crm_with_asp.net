@@ -1,4 +1,3 @@
-<!-- Mobile topbar -->
 <header
   class="lg:hidden flex items-center justify-between bg-white border-b border-gray-200 px-5 py-3 shadow fixed top-0 left-0 right-0 z-40"
 >
@@ -8,7 +7,6 @@
     class="text-gray-600 hover:text-[#009434] focus:outline-none focus:ring-2 focus:ring-[#00b144] rounded"
     aria-label="Toggle menu"
   >
-    <!-- Hamburger icon -->
     <svg
       id="icon-hamburger"
       class="w-7 h-7"
@@ -27,14 +25,57 @@
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-    bool isCustomerActive = currentController == "Lead" || currentController == "Customer";
+
+    // Ambil peran pengguna dari klaim
+    var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+    // Fungsi helper untuk memeriksa izin
+    bool HasPermission(string permissionName)
+    {
+        return User.HasClaim("permission", permissionName);
+    }
+
+    // Tentukan apakah "Customer Management" harus aktif berdasarkan controller saat ini
+    bool isCustomerSectionActive = currentController == "Lead" || currentController == "Customer";
+
+    // Tentukan apakah dropdown "Customer" harus terbuka secara default
+    // Jika user punya permission lead.view ATAU customer.view DAN salah satu controller Lead/Customer sedang aktif
+    // Atau jika user adalah Admin/Super Admin DAN salah satu controller Lead/Customer sedang aktif
+    bool shouldOpenCustomerDropdown = isCustomerSectionActive && (
+        currentUserRole == "Admin" ||
+        currentUserRole == "Super Admin" ||
+        HasPermission("lead.view") ||
+        HasPermission("customer.view")
+    );
+
+
+    // Cek controller2 inventory agar menu active
+    bool isInventorySectionActive =
+        currentController == "Stock"
+        || currentController == "StockIn"
+        || currentController == "StockOut"
+        || currentController == "StockAdjustment"
+        || currentController == "StockOpname"
+        || currentController == "Warehouse";
+    // -----------------------------------
+
+    bool isProductSectionActive =
+        currentController == "ProductCategory"
+        || currentController == "Oil"
+        || currentController == "Machine"
+        || currentController == "Product"
+        || currentController == "ProductStock";
 }
 
 <aside
   id="sidebar"
-  x-data="{ openCustomer: @Html.Raw(isCustomerActive.ToString().ToLower()) }"
+  x-data="{
+    openCustomer: @Html.Raw(shouldOpenCustomerDropdown.ToString().ToLower()),
+    openInventory: @Html.Raw(isInventorySectionActive.ToString().ToLower()),
+    openProduct: @Html.Raw(isProductSectionActive.ToString().ToLower())
+  }"
   class="fixed top-0 left-0 z-50 w-64 h-full bg-white border-r border-gray-300 flex flex-col
-         transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl"
+          transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl"
 >
   <div
     class="px-6 py-5 border-b border-gray-300 flex items-center justify-between font-extrabold text-2xl tracking-widest text-[#009434] select-none"
@@ -61,10 +102,10 @@
     </button>
   </div>
 
-  <nav class="flex-1 px-5 py-7 space-y-1 overflow-y-auto mt-14 lg:mt-0 text-[14px] lg:text-[12px]">
+  <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto mt-14 lg:mt-0 text-[14px] lg:text-[12px]">
     <a
       href="/Dashboard/Index"
-      class="group flex items-center gap-3 px-4 py-2 rounded-lg font-semibold transition duration-200
+      class="group flex items-center gap-3 px-2 py-1 rounded-lg font-semibold transition duration-200
         @(currentController == "Dashboard" ? "bg-[#03b140] text-white" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
     >
       <svg
@@ -83,7 +124,7 @@
 
     <a
       href="/User/Profile"
-      class="group flex items-center gap-3 px-4 py-2 rounded-lg font-semibold transition duration-200
+      class="group flex items-center gap-3 px-2 py-1 rounded-lg font-semibold transition duration-200
         @(currentController == "User" && currentAction == "Profile" ? "bg-[#03b140] text-white" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
     >
       <svg
@@ -104,81 +145,247 @@
       My Profile
     </a>
 
-    <a
-      href="/User/Index"
-      class="group flex items-center gap-3 px-4 py-2 rounded-lg font-semibold transition duration-200
-        @(currentController == "User" && currentAction == "Index" ? "bg-[#03b140] text-white" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
-    >
-      <svg
-        class="w-6 h-6 transition-colors duration-200
-          @(currentController == "User" && currentAction == "Index" ? "text-white" : "text-gray-400 group-hover:text-white")"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m12 0a4 4 0 00-3-3.87M9 12a4 4 0 110-8 4 4 0 010 8z"
-        ></path>
-      </svg>
-      Users
-    </a>
+    @* Users Link (Only for Admin or Super Admin roles, or specific permission) *@
+    @if (currentUserRole == "Admin" || currentUserRole == "Super Admin" || HasPermission("user.view"))
+    {
+        <a
+          href="/User/Index"
+          class="group flex items-center gap-3 px-2 py-1 rounded-lg font-semibold transition duration-200
+            @(currentController == "User" && currentAction == "Index" ? "bg-[#03b140] text-white" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
+        >
+          <svg
+            class="w-6 h-6 transition-colors duration-200
+              @(currentController == "User" && currentAction == "Index" ? "text-white" : "text-gray-400 group-hover:text-white")"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m12 0a4 4 0 00-3-3.87M9 12a4 4 0 110-8 4 4 0 010 8z"
+            ></path>
+          </svg>
+          Users
+        </a>
+    }
 
-    <!-- Customer Management dropdown -->
-    <button
-        x-on:click="openCustomer = !openCustomer"
-        class="w-full flex justify-between items-center px-4 py-2 rounded-lg font-semibold transition duration-200 focus:outline-none
-            @(isCustomerActive ? "bg-[#03b140] text-white hover:bg-[#007e2a]" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
-        type="button"
-        aria-expanded="false"
-    >
-        <span :class="openCustomer ? '' : ''" class="flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m4 0a4 4 0 10-4-4 4 4 0 004 4zm6-5a4 4 0 11-8 0 4 4 0 018 0z"/>
+    @* Customer Management dropdown (Only for Admin, Super Admin, or if any customer/lead permission) *@
+    @if (currentUserRole == "Admin" || currentUserRole == "Super Admin" || HasPermission("lead.view") || HasPermission("customer.view"))
+    {
+        <button
+            x-on:click="openCustomer = !openCustomer"
+            class="w-full flex justify-between items-center px-2 py-1 rounded-lg font-semibold transition duration-200 focus:outline-none
+                @(isCustomerSectionActive ? "bg-[#03b140] text-white hover:bg-[#007e2a]" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
+            type="button"
+            aria-expanded="false"
+        >
+            <span :class="openCustomer ? '' : ''" class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m4 0a4 4 0 10-4-4 4 4 0 004 4zm6-5a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                Customer
+            </span>
+
+            <svg :class="openCustomer ? ' transform rotate-90' : 'text-gray-400'"
+                class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
             </svg>
-            Customer
-        </span>
+        </button>
 
-        <svg :class="openCustomer ? ' transform rotate-90' : 'text-gray-400'"
-             class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-    </button>
+        <div
+          x-show="openCustomer"
+          x-transition
+          class="pl-8 space-y-2 mt-1"
+          style="display: none;"
+        >
+            @* Leads Link *@
+            @if (HasPermission("lead.view"))
+            {
+                <a
+                  href="/Lead/Index"
+                  class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-green-200 hover:text-green-800 transition duration-200
+                        @(currentController == "Lead" ? "bg-[#03b140] text-white" : "")"
+                >
+                  Leads
+                </a>
+            }
+            @* Customers Link *@
+            @if (HasPermission("customer.view"))
+            {
+                <a
+                  href="/Customer/List"
+                  class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-green-200 hover:text-green-800 transition duration-200
+                        @(currentController == "Customer" ? "bg-[#03b140] text-white" : "")"
+                >
+                  Customers
+                </a>
+            }
+        </div>
+    }
 
-    <div
-      x-show="openCustomer"
-      x-transition
-      class="pl-8 space-y-2 mt-1"
-      style="display: none;"
-    >
-      <a
-        href="/Lead/Index"
-        class="block px-4 py-2 rounded-lg text-gray-600 hover:bg-green-200 hover:text-green-800 transition duration-200
-           @(currentController == "Lead" ? "bg-[#03b140] text-white" : "")"
-      >
-        Leads
-      </a>
-      <a
-        href="/Customer/List"
-        class="block px-4 py-2 rounded-lg text-gray-600 hover:bg-green-200 hover:text-green-800 transition duration-200
-           @(currentController == "Customer" ? "bg-[#03b140] text-white" : "")"
-      >
-        Customers
-      </a>
-    </div>
+
+    @if (
+        currentUserRole == "Admin" ||
+        currentUserRole == "Super Admin" ||
+        HasPermission("productcategory.view") ||
+        HasPermission("oil.view") ||
+        HasPermission("machine.view") ||
+        HasPermission("product.view") // dst, sesuai permission
+    )
+    {
+        <button
+            x-on:click="openProduct = !openProduct"
+            class="w-full flex justify-between items-center px-1 py-1 rounded-lg font-semibold transition duration-200 focus:outline-none
+                @(isProductSectionActive ? "bg-[#03b140] text-white hover:bg-[#007e2a]" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
+            type="button"
+            aria-expanded="false"
+        >
+            <span class="flex items-center gap-3">
+              <!-- ICON SHELF / PRODUCT RACK -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect x="4" y="4" width="16" height="5" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <rect x="4" y="15" width="16" height="5" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <rect x="7" y="9" width="10" height="6" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+              Management Product
+          </span>
+
+
+            <svg :class="openProduct ? ' transform rotate-90' : 'text-gray-400'"
+                class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <div
+          x-show="openProduct"
+          x-transition
+          class="pl-8 space-y-2 mt-1"
+          style="display: none;"
+        >
+            @if (HasPermission("productcategory.view"))
+            {
+                <a href="/ProductCategory/Index"
+                    class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "ProductCategory" ? "bg-[#03b140] text-white" : "")">
+                    Product Categories
+                </a>
+            }
+            @if (HasPermission("oil.view"))
+            {
+                <a href="/Oil/Index"
+                    class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "Oil" ? "bg-[#03b140] text-white" : "")">
+                    Oils
+                </a>
+            }
+            @if (HasPermission("machine.view"))
+            {
+                <a href="/Machine/Index"
+                    class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "Machine" ? "bg-[#03b140] text-white" : "")">
+                    Machines
+                </a>
+            }
+            @if (HasPermission("product.view"))
+            {
+                <a href="/Product/Index"
+                    class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "Product" ? "bg-[#03b140] text-white" : "")">
+                    Products
+                </a>
+            }
+            <!-- Tambahkan link lain jika perlu -->
+        </div>
+    }
+
+
+    <!-- Management Inventory dropdown -->
+    @if (
+        currentUserRole == "Admin" ||
+        currentUserRole == "Super Admin" ||
+        HasPermission("inventory.view")
+    )
+    {
+        <button
+            x-on:click="openInventory = !openInventory"
+            class="w-full flex justify-between items-center px-2 py-1 rounded-lg font-semibold transition duration-200 focus:outline-none
+                @(isInventorySectionActive ? "bg-[#03b140] text-white hover:bg-[#007e2a]" : "text-gray-700 hover:bg-[#00b144] hover:text-white")"
+            type="button"
+            aria-expanded="false"
+        >
+            <span class="flex items-center gap-3">
+              <!-- ICON STACKED BOXES / INVENTORY -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="15" width="7" height="6" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <rect x="14" y="15" width="7" height="6" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <rect x="8.5" y="3" width="7" height="6" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <rect x="8.5" y="9" width="7" height="6" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+              </svg>
+              Inventory Management
+          </span>
+
+            <svg :class="openInventory ? ' transform rotate-90' : 'text-gray-400'"
+                class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <div
+          x-show="openInventory"
+          x-transition
+          class="pl-8 space-y-2 mt-1"
+          style="display: none;"
+        >
+            <a href="/Stock/Overview"
+              class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "Stock" && currentAction == "Overview" ? "bg-[#03b140] text-white" : "")">
+                Stock Overview
+            </a>
+            <a href="/StockIn/Index"
+              class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "StockIn" ? "bg-[#03b140] text-white" : "")">
+                Stock In
+            </a>
+            <a href="/StockOut/Index"
+              class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "StockOut" ? "bg-[#03b140] text-white" : "")">
+                Stock Out
+            </a>
+            <a href="/StockAdjustment/Index"
+              class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "StockAdjustment" ? "bg-[#03b140] text-white" : "")">
+                Stock Adjustment
+            </a>
+            <a href="/StockOpname/Index"
+              class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "StockOpname" ? "bg-[#03b140] text-white" : "")">
+                Stock Opname
+            </a>
+            <a href="/Stock/Movement"
+              class="block px-2 py-1 rounded-lg text-gray-600 hover:bg-blue-100 hover:text-green-800 transition duration-200
+                    @(currentController == "Stock" && currentAction == "Movement" ? "bg-[#03b140] text-white" : "")">
+                Stock Movement/History
+            </a>
+            @* Tambahkan Warehouse Management jika ada *@
+            @* <a href="/Warehouse/Index" ...>Warehouse Management</a> *@
+        </div>
+    }
+
 
     <a href="/Auth/Logout"
-       class="block px-4 py-2 rounded-lg text-red-600 hover:bg-red-100 hover:text-red-800 font-semibold transition duration-200">
+       class="block px-2 py-1 rounded-lg text-red-600 hover:bg-red-100 hover:text-red-800 font-semibold transition duration-200">
       Logout
     </a>
   </nav>
 </aside>
 
-<!-- Overlay for mobile sidebar -->
 <div
   id="sidebar-overlay"
   class="fixed inset-0 bg-black bg-opacity-50 hidden lg:hidden z-40"
