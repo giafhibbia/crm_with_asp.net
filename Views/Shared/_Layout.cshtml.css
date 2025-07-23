@@ -46,3 +46,24 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+
+.print-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  page-break-inside: avoid;
+}
+@media print {
+  body {
+    margin: 0 !important;
+  }
+  .qr-title {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .qr-group {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
