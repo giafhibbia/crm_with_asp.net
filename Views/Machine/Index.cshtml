@@ -15,17 +15,16 @@
     <button type="submit" form="bulkDeleteForm"
         id="deleteSelectedBtn"
         onclick="return confirm('Yakin ingin menghapus data terpilih?')"
-        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-800 whitespace-nowrap inline-block w-full sm:w-auto text-center">
+        class="text-[12px] bg-red-600 hidden md:block text-white px-4 py-1 rounded hover:bg-red-800 whitespace-nowrap inline-block w-full sm:w-auto text-center opacity-50 cursor-not-allowed"
+        disabled>
         Delete Selected
     </button>
-
-    <button id="printSelectedQrBtn" type="button" class="bg-[#009434] text-white px-4 py-2 rounded hover:bg-[#007e2a] whitespace-nowrap inline-block w-full sm:w-auto text-center">
+    <button id="printSelectedQrBtn" type="button" class="text-[12px] bg-[#009434] hidden md:block text-white px-4 py-1 rounded hover:bg-[#007e2a] whitespace-nowrap inline-block w-full sm:w-auto text-center opacity-50 cursor-not-allowed" disabled>
         Print Selected QR
     </button>
-
     <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full md:w-auto">
         <a href="@Url.Action("Create", "Machine")"
-           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-[#007e2a] whitespace-nowrap inline-block w-full sm:w-auto text-center">
+           class="text-[12px] bg-blue-600 text-white px-4 py-1 rounded hover:bg-[#007e2a] whitespace-nowrap inline-block w-full sm:w-auto text-center">
             + Add Machine
         </a>
     </div>
@@ -33,36 +32,30 @@
 
 <div class="overflow-x-auto rounded shadow">
     <form id="bulkDeleteForm" asp-action="BulkDelete" method="post">
-    <table class="min-w-full bg-white rounded overflow-hidden hidden md:table">
+    <table class="min-w-full bg-white rounded overflow-hidden hidden  md:table">
         <thead class="bg-[#f3f3f3] text-[#555555]">
             <tr>
                 <th class="px-3 py-3 text-center">
                     <input type="checkbox" id="checkAll" />
                 </th>
-                <th class="px-4 py-3 text-left">Asset Code</th>
-                <th class="px-4 py-3 text-left">Name</th>
-                <th class="px-4 py-3 text-left">Full Name</th>
-                <th class="px-4 py-3 text-left">Qty</th>
-                <th class="px-4 py-3 text-left">Condition</th>
-                <th class="px-4 py-3 text-left">Status</th>
-                <th class="px-4 py-3 text-left">Category</th>
-                <th class="px-4 py-3 text-left">Created By</th>
-                <th class="px-4 py-3 text-left">Created</th>
-                <th class="px-4 py-3 text-center">Actions</th>
+                <th class="px-4 py-3 text-[12px] text-left">Asset Code</th>
+                <th class="px-4 py-3 text-[12px] text-left">Name</th>
+                <th class="px-4 py-3 text-[12px] text-left">Status</th>
+                <th class="px-4 py-3 text-[12px] text-left">Created By</th>
+                <th class="px-4 py-3 text-[12px] text-left">Created</th>
+                <th class="px-4 py-3 text-[12px] text-center">Actions</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
             @if (Model != null && Model.Items.Count > 0)
             {
-                int no = (Model.CurrentPage - 1) * Model.PageSize + 1;
                 foreach (var m in Model.Items)
                 {
-                    <tr class="hover:bg-green-50">
+                    <tr class="hover:bg-green-50 text-[12px]">
                         <td class="px-3 py-2 text-center">
                             <input type="checkbox" name="ids" value="@m.Id" class="row-checkbox" data-asset="@m.AssetCode" />
-
                         </td>
-                        <td class="px-4 py-2 flex items-center gap-2">
+                        <td class="px-4 py-2 flex items-center gap-2 text-[12px]">
                             <span>@m.AssetCode</span>
                             <button type="button" class="qr-btn" data-asset="@m.AssetCode" title="Show QR Code">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 hover:text-[#009434]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,39 +63,33 @@
                                 </svg>
                             </button>
                         </td>
-
-                        <td class="px-4 py-2">@m.Name</td>
-                        <td class="px-4 py-2">@m.FullName</td>
-                        <td class="px-4 py-2">@m.Qty</td>
-                        <td class="px-4 py-2">@m.Condition</td>
-                        <td class="px-4 py-2">
+                        <td class="px-4 py-2 text-[12px]">@m.Name</td>
+                        <td class="px-4 py-2 text-[12px]">
                             @MyAuthDemo.Helpers.EnumHelper.GetFriendlyName(m.StatusType)
                         </td>
-                        <td class="px-4 py-2">@m.CategoryName</td>
-                        <td class="px-4 py-2">@m.InputByUserName</td>
-                        <td class="px-4 py-2">@(m.InputAt?.ToString("yyyy-MM-dd"))</td>
-                        <td class="px-6 py-3 text-center space-x-3">
+                        <td class="px-4 py-2 text-[12px]">@m.InputByUserName</td>
+                        <td class="px-4 py-2 text-[12px]">@(m.InputAt?.ToString("yyyy-MM-dd"))</td>
+                        <td class="px-5 py-3 text-center space-x-3">
                             <a href="@Url.Action("Details", new { id = m.Id })" class="text-gray-600 hover:text-[#009434]" title="Details">
                                 <!-- Eye icon -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </a>
                             <a href="@Url.Action("Edit", new { id = m.Id })" class="text-[#009434] hover:text-[#007e2a]" title="Edit">
                                 <!-- Edit icon -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-5-4l5-5m0 0l-5 5m5-5v12" />
                                 </svg>
                             </a>
-                            <a href="@Url.Action("Delete", new { id = m.Id })" class="text-red-600 hover:text-red-800" title="Delete" onclick="return confirm('Yakin ingin menghapus data ini?')">
+                            <a href="@Url.Action("Delete", new { id = m.Id })" class="text-red-600 hover:text-red-800" title="Delete" >
                                 <!-- Delete icon -->
-                                <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </a>
                         </td>
-
                     </tr>
                 }
             }
@@ -113,6 +100,21 @@
         </tbody>
     </table>
     </form>
+</div>
+
+<!-- MOBILE: Tombol Bulk di atas -->
+<div class="md:hidden px-4 pt-3 pb-2 flex gap-2">
+    <button type="submit" form="bulkDeleteFormMobile"
+        id="deleteSelectedBtnMobile"
+        class="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-800 text-sm opacity-50 cursor-not-allowed flex-1"
+        disabled>
+        Delete Selected
+    </button>
+    <button id="printSelectedQrBtnMobile" type="button"
+        class="bg-[#009434] text-white px-3 py-2 rounded hover:bg-[#007e2a] text-sm opacity-50 cursor-not-allowed flex-1"
+        disabled>
+        Print Selected QR
+    </button>
 </div>
 
 <form id="bulkDeleteFormMobile" asp-action="BulkDelete" method="post">
@@ -140,14 +142,8 @@
                             </svg>
                         </a>
                     </div>
-
                     <div><strong>Name:</strong> @m.Name</div>
-                    <div><strong>Full Name:</strong> @m.FullName</div>
-                    <div><strong>Qty:</strong> @m.Qty</div>
-                    <div><strong>Condition:</strong> @m.Condition</div>
-                    <div><strong>Status:</strong>
-                        @MyAuthDemo.Helpers.EnumHelper.GetFriendlyName(m.StatusType)
-                    </div>
+                    <div><strong>Status:</strong> @MyAuthDemo.Helpers.EnumHelper.GetFriendlyName(m.StatusType)</div>
                     <div><strong>Category:</strong> @m.CategoryName</div>
                     <div class="text-xs text-gray-500"><strong>Created:</strong> @(m.InputAt?.ToString("yyyy-MM-dd"))</div>
                 </div>
@@ -210,15 +206,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Deklarasi tombol desktop & mobile
         const printSelectedQrBtn = document.getElementById('printSelectedQrBtn');
         const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
         const checkAllDesktop = document.getElementById('checkAll');
 
+        const printSelectedQrBtnMobile = document.getElementById('printSelectedQrBtnMobile');
+        const deleteSelectedBtnMobile = document.getElementById('deleteSelectedBtnMobile');
+
         function getAllRowCheckboxes() {
             return Array.from(document.querySelectorAll('.row-checkbox'));
         }
+        function getAllRowCheckboxesMobile() {
+            return Array.from(document.querySelectorAll('.row-checkbox-mobile'));
+        }
 
         function updateBulkActionButtonState() {
+            // Desktop
             const allRowCheckboxes = getAllRowCheckboxes();
             const anyChecked = allRowCheckboxes.some(cb => cb.checked);
 
@@ -232,8 +236,24 @@
                 deleteSelectedBtn.classList.toggle('opacity-50', !anyChecked);
                 deleteSelectedBtn.classList.toggle('cursor-not-allowed', !anyChecked);
             }
+
+            // Mobile
+            const allRowCheckboxesMobile = getAllRowCheckboxesMobile();
+            const anyCheckedMobile = allRowCheckboxesMobile.some(cb => cb.checked);
+
+            if (printSelectedQrBtnMobile) {
+                printSelectedQrBtnMobile.disabled = !anyCheckedMobile;
+                printSelectedQrBtnMobile.classList.toggle('opacity-50', !anyCheckedMobile);
+                printSelectedQrBtnMobile.classList.toggle('cursor-not-allowed', !anyCheckedMobile);
+            }
+            if (deleteSelectedBtnMobile) {
+                deleteSelectedBtnMobile.disabled = !anyCheckedMobile;
+                deleteSelectedBtnMobile.classList.toggle('opacity-50', !anyCheckedMobile);
+                deleteSelectedBtnMobile.classList.toggle('cursor-not-allowed', !anyCheckedMobile);
+            }
         }
 
+        // Desktop: Select All
         if (checkAllDesktop) {
             checkAllDesktop.addEventListener('change', function () {
                 const isChecked = this.checked;
@@ -244,6 +264,17 @@
             });
         }
 
+        // Event delegation untuk mobile: listen di parent form (pasti kena walau paging!)
+        const mobileForm = document.getElementById('bulkDeleteFormMobile');
+        if (mobileForm) {
+            mobileForm.addEventListener('change', function (e) {
+                if (e.target && e.target.classList.contains('row-checkbox-mobile')) {
+                    updateBulkActionButtonState();
+                }
+            });
+        }
+
+        // Desktop: Pasang listener ke setiap checkbox
         function attachCheckboxListeners() {
             getAllRowCheckboxes().forEach(cb => {
                 cb.addEventListener('change', function () {
@@ -257,61 +288,70 @@
             });
         }
 
-        // --- Print QR Selected ---
+        // Desktop: Print QR
         if (printSelectedQrBtn) {
             printSelectedQrBtn.addEventListener('click', function () {
-                const allRowCheckboxes = getAllRowCheckboxes();
-                const selectedAssetCodes = [];
-                allRowCheckboxes.forEach(cb => {
-                    if (cb.checked) {
-                        let assetCode = cb.getAttribute('data-asset') || '';
-                        if (assetCode) selectedAssetCodes.push(assetCode);
-                    }
-                });
-
-                if (selectedAssetCodes.length === 0) {
-                    alert('Pilih minimal 1 asset terlebih dahulu.');
-                    return;
-                }
-                let printWindow = window.open('', '_blank', 'width=700,height=900');
-                if (!printWindow) {
-                    alert('Pop-up blocker mungkin memblokir jendela cetak. Izinkan pop-up dan coba lagi.');
-                    return;
-                }
-
-                const uniqueAssetCodes = Array.from(new Set(selectedAssetCodes));
-                let html = ''
-                    + '<html><head><title>Print QR Code</title>'
-                    + '<style>'
-                    + 'body{margin:16px;font-family:sans-serif;}'
-                    + '.print-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;page-break-inside:avoid;}'
-                    + '.qr-group{border:1px solid #eee;padding:12px 6px 16px 6px;text-align:center;background:#fff;break-inside:avoid;page-break-inside:avoid;}'
-                    + '.qr-title{font-size:16px;font-weight:bold;margin-bottom:6px;}'
-                    + 'img{margin-bottom:8px;max-width:100%;height:auto;}'
-                    + '@@media print{body{margin:0 !important;}.qr-group{break-inside:avoid;page-break-inside:avoid;}}'
-                    + '</style>'
-                    + '</head><body>';
-                html += '<div class="print-grid">';
-                uniqueAssetCodes.forEach(function(code, i) {
-                    const dataUrl = generateQrDataUrl(code, 180);
-                    html += '<div class="qr-group">'
-                        + '<div class="qr-title">' + code + '</div>'
-                        + '<img src="' + dataUrl + '" width="180" height="180" data-qr-index="' + i + '" />'
-                        + '</div>';
-                });
-                html += '</div>';
-
-                html += '<script>'
-                    + 'function allImagesLoaded(){var imgs=document.images;for(var i=0;i<imgs.length;i++){if(!imgs[i].complete)return false;}return true;}'
-                    + 'function tryPrint(){if(allImagesLoaded()){setTimeout(function(){window.print();setTimeout(function(){window.close();},300);},150);}else{setTimeout(tryPrint,100);}}'
-                    + 'tryPrint();'
-                    + '<\/script>'
-                    + '</body></html>';
-
-                printWindow.document.open();
-                printWindow.document.write(html);
-                printWindow.document.close();
+                handlePrintBulkQr(getAllRowCheckboxes());
             });
+        }
+        // Mobile: Print QR
+        if (printSelectedQrBtnMobile) {
+            printSelectedQrBtnMobile.addEventListener('click', function () {
+                handlePrintBulkQr(getAllRowCheckboxesMobile());
+            });
+        }
+
+        function handlePrintBulkQr(checkboxes) {
+            const selectedAssetCodes = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    let assetCode = cb.getAttribute('data-asset') || '';
+                    if (assetCode) selectedAssetCodes.push(assetCode);
+                }
+            });
+
+            if (selectedAssetCodes.length === 0) {
+                alert('Pilih minimal 1 asset terlebih dahulu.');
+                return;
+            }
+            let printWindow = window.open('', '_blank', 'width=700,height=900');
+            if (!printWindow) {
+                alert('Pop-up blocker mungkin memblokir jendela cetak. Izinkan pop-up dan coba lagi.');
+                return;
+            }
+
+            const uniqueAssetCodes = Array.from(new Set(selectedAssetCodes));
+            let html = ''
+                + '<html><head><title>Print QR Code</title>'
+                + '<style>'
+                + 'body{margin:16px;font-family:sans-serif;}'
+                + '.print-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;page-break-inside:avoid;}'
+                + '.qr-group{border:1px solid #eee;padding:12px 6px 16px 6px;text-align:center;background:#fff;break-inside:avoid;page-break-inside:avoid;}'
+                + '.qr-title{font-size:16px;font-weight:bold;margin-bottom:6px;}'
+                + 'img{margin-bottom:8px;max-width:100%;height:auto;}'
+                + '@@media print{body{margin:0 !important;}.qr-group{break-inside:avoid;page-break-inside:avoid;}}'
+                + '</style>'
+                + '</head><body>';
+            html += '<div class="print-grid">';
+            uniqueAssetCodes.forEach(function(code, i) {
+                const dataUrl = generateQrDataUrl(code, 180);
+                html += '<div class="qr-group">'
+                    + '<div class="qr-title">' + code + '</div>'
+                    + '<img src="' + dataUrl + '" width="180" height="180" data-qr-index="' + i + '" />'
+                    + '</div>';
+            });
+            html += '</div>';
+
+            html += '<script>'
+                + 'function allImagesLoaded(){var imgs=document.images;for(var i=0;i<imgs.length;i++){if(!imgs[i].complete)return false;}return true;}'
+                + 'function tryPrint(){if(allImagesLoaded()){setTimeout(function(){window.print();setTimeout(function(){window.close();},300);},150);}else{setTimeout(tryPrint,100);}}'
+                + 'tryPrint();'
+                + '<\/script>'
+                + '</body></html>';
+
+            printWindow.document.open();
+            printWindow.document.write(html);
+            printWindow.document.close();
         }
 
         function generateQrDataUrl(text, size = 180) {
@@ -319,7 +359,7 @@
             return qr.toDataURL('image/png');
         }
 
-        // Inisialisasi!
+        // Inisialisasi
         attachCheckboxListeners();
         updateBulkActionButtonState();
     });

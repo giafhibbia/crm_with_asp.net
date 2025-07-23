@@ -246,26 +246,30 @@ namespace MyAuthDemo.Controllers
                 .Include(m => m.InputByUser)
                 .Include(m => m.UpdatedByUser)
                 .FirstOrDefault(m => m.Id == id);
+
             if (machine == null) return NotFound();
 
             var vm = new MachineViewModel
             {
                 Id = machine.Id,
+                AssetCode = machine.AssetCode,
                 Name = machine.Name,
                 FullName = machine.FullName,
-                AssetCode = machine.AssetCode,
+                Description = machine.Description,
                 Qty = machine.Qty,
-                CategoryName = machine.Category?.Name,
+                CategoryName = machine.Category?.Name ?? "-",
                 ImageUrl = machine.ImageUrl,
                 Condition = machine.Condition,
                 StatusType = machine.StatusType,
+                InputByUserName = machine.InputByUser?.Name ?? "-",
+                UpdatedByUserName = machine.UpdatedByUser?.Name ?? "-",
                 InputAt = machine.InputAt,
-                UpdatedAt = machine.UpdatedAt,
-                InputByUserName = machine.InputByUser?.Name,
-                UpdatedByUserName = machine.UpdatedByUser?.Name
+                UpdatedAt = machine.UpdatedAt
             };
             return View(vm);
         }
+
+
 
         // DELETE
         [HttpGet]
