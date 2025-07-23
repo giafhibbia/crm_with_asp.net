@@ -22,6 +22,8 @@ namespace MyAuthDemo.Data
           public DbSet<Province> Provinces { get; set; }
         public DbSet<Regency> Regencies { get; set; }
         public DbSet<Lead> Leads { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
+        public DbSet<Machine> Machines { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -73,7 +75,7 @@ namespace MyAuthDemo.Data
                 .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId)
                 .HasConstraintName("FK_RolePermissions_PermissionId");
-                
+
             modelBuilder.Entity<Province>()
                 .ToTable("reg_provinces")
                 .HasKey(p => p.Id);
@@ -100,7 +102,7 @@ namespace MyAuthDemo.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
 
-                
+
 
             // Lead → Group
             modelBuilder.Entity<Lead>()
@@ -109,6 +111,30 @@ namespace MyAuthDemo.Data
                 .HasForeignKey(z => z.GroupId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_Leads_Groups_GroupId");
+                
+
+
+            // relation builder for machine
+            modelBuilder.Entity<Machine>()
+                .HasOne(m => m.InputByUser)
+                .WithMany(u => u.MachinesCreated)
+                .HasForeignKey(m => m.InputByUserId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Machine_InputByUserId");
+
+            modelBuilder.Entity<Machine>()
+                .HasOne(m => m.UpdatedByUser)
+                .WithMany(u => u.MachinesUpdated)
+                .HasForeignKey(m => m.UpdatedByUserId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Machine_UpdatedByUserId");
+
+            modelBuilder.Entity<ProductCategory>()
+                .HasMany(pc => pc.Machines)
+                .WithOne(m => m.Category)
+                .HasForeignKey(m => m.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Machine_CategoryId");
 
 
         }

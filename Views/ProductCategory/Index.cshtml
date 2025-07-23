@@ -1,0 +1,348 @@
+@model PagedResult<MyAuthDemo.Models.ProductCategory>
+
+@{
+    ViewBag.Title = "Product Categories";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+}
+
+<h1 class="text-3xl font-bold mb-6 text-[#009434]">@ViewBag.Title</h1>
+
+<!-- Loading Spinner -->
+<div id="loading-spinner" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+    <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+</div>
+
+<!-- Modal Confirm Delete -->
+<div id="confirmDeleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-xs text-center">
+        <h2 class="text-xl font-bold mb-3 text-[#e74c3c]">Confirm Delete</h2>
+        <p class="mb-5">Are you sure you want to delete all selected categories?</p>
+        <div class="flex justify-center gap-3">
+            <button type="button" id="cancelDeleteBtn"
+                class="px-4 py-1 rounded border border-gray-300 hover:bg-gray-100 text-gray-700">Cancel</button>
+            <button type="button" id="confirmDeleteBtn"
+                class="px-4 py-1 rounded bg-red-600 text-white hover:bg-red-700">Delete</button>
+        </div>
+    </div>
+</div>
+<!-- Search + Add + Export/Import + Bulk Delete -->
+<div class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+
+    <!-- Search Form -->
+    <form method="get" class="flex flex-wrap gap-3 items-center w-full md:w-auto flex-grow">
+        <input
+            type="text"
+            name="search"
+            value="@Model.Search"
+            placeholder="Search category"
+            class="border rounded px-3 py-1 w-full sm:w-auto"
+            autocomplete="off"
+        />
+        <button type="submit" class="bg-[#b9b9b9] text-white px-4 py-1 rounded hover:bg-[#727272]">
+            Filter
+        </button>
+    </form>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full md:w-auto">
+        <!-- Bulk Delete Button (disable by default) -->
+        <button type="button" id="bulkDeleteBtn"
+            class=" hidden md:inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed w-full sm:w-auto"
+            disabled>
+            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Delete Selected
+        </button>
+
+        <!-- Bulk Delete Button di mobile (sticky bawah jika mau) -->
+        <div class="sticky bottom-0 py-3 bg-white mt-2 flex justify-end z-10 md:hidden">
+            <button type="button"
+                id="bulkDeleteBtnMobile"
+                class="inline-flex items-center px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+                disabled>
+                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Delete Selected
+            </button>
+        </div>
+
+
+        <a asp-action="ExportExcel"
+           class="inline-flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition w-full sm:w-auto">
+            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 17l4 4 4-4m-4-5v9"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v4a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
+            </svg>
+            Export
+        </a>
+        <form asp-action="ImportExcel" asp-controller="ProductCategory" method="post" enctype="multipart/form-data" class="inline-block w-full sm:w-auto">
+            <label class="inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700 transition mb-0 w-full sm:w-auto">
+                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v8m0 0l-3.5-3.5M12 20l3.5-3.5"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 8V6a4 4 0 00-8 0v2"/>
+                </svg>
+                Import
+                <input type="file" name="file" accept=".xlsx" class="hidden" onchange="this.form.submit()" />
+            </label>
+        </form>
+        <a href="@Url.Action("Create", "ProductCategory")"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-[#007e2a] whitespace-nowrap inline-block w-full sm:w-auto text-center">
+            + Add Category
+        </a>
+    </div>
+</div>
+
+
+<!-- Table Desktop dengan Multiple Delete -->
+<div class="overflow-x-auto rounded shadow">
+    <form id="bulkDeleteForm" asp-action="BulkDelete" method="post">
+    <table class="min-w-full bg-white rounded overflow-hidden hidden md:table">
+        <thead class="bg-[#f3f3f3] text-[#555555]">
+            <tr>
+                <th class="px-3 py-3 text-center">
+                    <input type="checkbox" id="checkAll" />
+                </th>
+                <th class="px-6 py-3 text-left">Icon</th>
+                <th class="px-6 py-3 text-left">Name</th>
+                <th class="px-6 py-3 text-left">Description</th>
+                <th class="px-6 py-3 text-left">Created</th>
+                <th class="px-6 py-3 text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            @foreach (var cat in Model.Items)
+            {
+                <tr class="hover:bg-green-50">
+                    <td class="px-3 py-3 text-center">
+                        <input type="checkbox" name="ids" value="@cat.Id" class="row-checkbox" />
+                    </td>
+                    <td class="px-6 py-3">
+                        @if (!string.IsNullOrEmpty(cat.IconUrl))
+                        {
+                            <img src="@cat.IconUrl" alt="icon" style="max-height:32px;" />
+                        }
+                    </td>
+                    <td class="px-6 py-3">@cat.Name</td>
+                    <td class="px-6 py-3">@cat.Description</td>
+                    <td class="px-6 py-3">@cat.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td class="px-6 py-3 text-center space-x-3">
+                        <a href="@Url.Action("Details", new { id = cat.Id })" class="text-gray-600 hover:text-[#009434]" title="Details">
+                            <!-- Eye icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </a>
+                        <a href="@Url.Action("Edit", new { id = cat.Id })" class="text-[#009434] hover:text-[#007e2a]" title="Edit">
+                            <!-- Edit icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-5-4l5-5m0 0l-5 5m5-5v12" />
+                            </svg>
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = cat.Id })" class="text-red-600 hover:underline" title="Delete">
+                            <!-- Delete icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </form>
+</div>
+<!-- Mobile Cards (dengan multiple select delete) -->
+<form id="bulkDeleteFormMobile" asp-action="BulkDelete" method="post">
+    <div class="md:hidden space-y-4 px-4">
+        @foreach (var cat in Model.Items)
+        {
+            <div class="bg-white rounded shadow p-4 flex items-start gap-3">
+                <input type="checkbox" name="ids" value="@cat.Id" class="row-checkbox-mobile mt-1 flex-shrink-0" />
+                <div class="flex-1">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center space-x-2">
+                            @if (!string.IsNullOrEmpty(cat.IconUrl))
+                            {
+                                <img src="@cat.IconUrl" alt="icon" style="max-height:32px;" />
+                            }
+                            <span class="font-semibold text-lg text-[#009434]">@cat.Name</span>
+                        </div>
+                        <div class="space-x-3 flex-shrink-0">
+                            <a href="@Url.Action("Details", new { id = cat.Id })" title="Details" class="text-gray-600 hover:text-[#009434] inline-block">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </a>
+                            <a href="@Url.Action("Edit", new { id = cat.Id })" title="Edit" class="text-[#009434] hover:text-[#007e2a] inline-block">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-5-4l5-5m0 0l-5 5m5-5v12" />
+                                </svg>
+                            </a>
+                            <a href="@Url.Action("Delete", new { id = cat.Id })" title="Delete" class="text-red-600 hover:text-red-800 inline-block">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div><strong>Description:</strong> @cat.Description</div>
+                    <div><strong>Created:</strong> @cat.CreatedAt.ToString("yyyy-MM-dd")</div>
+                </div>
+            </div>
+        }
+
+        
+    </div>
+</form>
+
+
+
+<!-- Pagination -->
+@if (Model.TotalPages > 1)
+{
+    <nav class="flex justify-center mt-6 space-x-2" aria-label="Pagination">
+        @if (Model.HasPreviousPage)
+        {
+            <a href="@Url.Action("Index", new { page = Model.CurrentPage - 1, search = Model.Search })" class="px-3 py-1 border rounded hover:bg-[#009434] hover:text-white transition">Previous</a>
+        }
+        else
+        {
+            <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">Previous</span>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            if (i == Model.CurrentPage)
+            {
+                <span class="px-3 py-1 border rounded bg-[#009434] text-white">@i</span>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", new { page = i, search = Model.Search })" class="px-3 py-1 border rounded hover:bg-[#009434] hover:text-white transition">@i</a>
+            }
+        }
+
+        @if (Model.HasNextPage)
+        {
+            <a href="@Url.Action("Index", new { page = Model.CurrentPage + 1, search = Model.Search })" class="px-3 py-1 border rounded hover:bg-[#009434] hover:text-white transition">Next</a>
+        }
+        else
+        {
+            <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">Next</span>
+        }
+    </nav>
+}
+
+<style>
+  #loading-spinner { position: fixed; inset: 0; background-color: rgba(0,0,0,0.3); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+  .loader { border-top-color: #009434; animation: spin 1s linear infinite; border: 8px solid #f3f3f3; border-radius: 50%; width: 64px; height: 64px; }
+  @@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+
+<script>
+    // Spinner logic
+    const spinner = document.getElementById('loading-spinner');
+    spinner.style.display = 'none';
+    document.querySelector('form').addEventListener('submit', () => {
+        spinner.style.display = 'flex';
+    });
+    document.querySelectorAll('nav a').forEach(link => {
+        link.addEventListener('click', () => {
+        spinner.style.display = 'flex';
+        });
+    });
+
+    // Checkbox enable/disable delete selected
+    const checkAll = document.getElementById('checkAll');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+    const confirmModal = document.getElementById('confirmDeleteModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
+    function updateDeleteButtonState() {
+        let checked = Array.from(document.querySelectorAll('.row-checkbox')).some(cb => cb.checked);
+        bulkDeleteBtn.disabled = !checked;
+    }
+
+    checkAll?.addEventListener('change', function() {
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+        cb.checked = this.checked;
+        });
+        updateDeleteButtonState();
+    });
+
+    rowCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateDeleteButtonState);
+    });
+
+    // Show confirm modal on delete selected click
+    bulkDeleteBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        confirmModal.classList.remove('hidden');
+    });
+
+    // Cancel in modal
+    cancelDeleteBtn.addEventListener('click', function () {
+        confirmModal.classList.add('hidden');
+    });
+
+    // Confirm in modal: submit the form
+    confirmDeleteBtn.addEventListener('click', function () {
+        spinner.style.display = 'flex';
+        bulkDeleteForm.submit();
+    });
+
+    
+    @* delete mobile version *@
+
+    const checkboxesMobile = document.querySelectorAll('.row-checkbox-mobile');
+    const bulkBtnMobile = document.getElementById('bulkDeleteBtnMobile');
+    const bulkDeleteFormMobile = document.getElementById('bulkDeleteFormMobile');
+
+    function updateBulkDeleteMobile() {
+        let checked = Array.from(checkboxesMobile).some(cb => cb.checked);
+        bulkBtnMobile.disabled = !checked;
+    }
+    checkboxesMobile.forEach(cb => cb.addEventListener('change', updateBulkDeleteMobile));
+    updateBulkDeleteMobile();
+
+    // Show confirm modal on delete selected click (mobile)
+    bulkBtnMobile?.addEventListener('click', function (e) {
+        e.preventDefault();
+        confirmModal.classList.remove('hidden');
+        // Tandai form yang mau di-submit
+        confirmModal.setAttribute('data-form', 'mobile');
+    });
+
+    // Show confirm modal on delete selected click (desktop)
+    bulkDeleteBtn?.addEventListener('click', function (e) {
+        e.preventDefault();
+        confirmModal.classList.remove('hidden');
+        confirmModal.setAttribute('data-form', 'desktop');
+    });
+
+    // Cancel in modal
+    cancelDeleteBtn?.addEventListener('click', function () {
+        confirmModal.classList.add('hidden');
+        confirmModal.removeAttribute('data-form');
+    });
+
+    // Confirm in modal: submit the correct form
+    confirmDeleteBtn?.addEventListener('click', function () {
+        spinner.style.display = 'flex';
+        const target = confirmModal.getAttribute('data-form');
+        if (target === 'mobile') {
+            bulkDeleteFormMobile.submit();
+        } else {
+            bulkDeleteForm.submit();
+        }
+    });
+</script>
